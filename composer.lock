@@ -1,0 +1,78 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "bc3b0b70d6cf4a8328ea351478998e53",
+    "packages": [
+        {
+            "name": "z4kn4fein/php-semver",
+            "version": "v1.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/z4kn4fein/php-semver.git",
+                "reference": "6ca4561055daeaed96e5cf11c081693f75669e52"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/z4kn4fein/php-semver/zipball/6ca4561055daeaed96e5cf11c081693f75669e52",
+                "reference": "6ca4561055daeaed96e5cf11c081693f75669e52",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^7|^8"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "z4kn4fein\\SemVer\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Peter Csajtai",
+                    "email": "peter.csajtai@outlook.com"
+                }
+            ],
+            "description": "Semantic Versioning library for PHP. It implements the full semantic version 2.0.0 specification and provides ability to parse, compare, and increment semantic versions.",
+            "homepage": "https://github.com/z4kn4fein/php-semver",
+            "keywords": [
+                "Semantic version",
+                "semver",
+                "semver-compare",
+                "semver-parsing"
+            ],
+            "support": {
+                "issues": "https://github.com/z4kn4fein/php-semver/issues",
+                "source": "https://github.com/z4kn4fein/php-semver/tree/v1.2.0"
+            },
+            "time": "2022-03-21T10:34:32+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {
+        "php": "^7.2.5|^8.0",
+        "ext-curl": "*",
+        "ext-mbstring": "*",
+        "ext-json": "*",
+        "ext-simplexml": "*"
+    },
+    "platform-dev": [],
+    "platform-overrides": {
+        "php": "7.2.5"
+    },
+    "plugin-api-version": "2.3.0"
+}

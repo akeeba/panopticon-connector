@@ -1,0 +1,17 @@
+### Component non-repo files
+/component/backend/version.php
+/component/backend/panopticon.xml
+/pkg_panopticon.xml
+
+### Composer
+/component/backend/vendor
+
+### Node.js
+/node_modules
+
+### Build & Release files
+/build/override.properties
+/release
+
+### Private files
+/assets/phpstorm_http/http-client.private.env.json
