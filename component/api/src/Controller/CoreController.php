@@ -11,6 +11,9 @@ defined('_JEXEC') || die;
 
 use Akeeba\Component\Panopticon\Api\Model\CoreModel;
 use Joomla\CMS\MVC\Controller\ApiController;
+use Joomla\CMS\Serializer\JoomlaSerializer;
+use Joomla\CMS\Uri\Uri;
+use Tobscure\JsonApi\Resource;
 
 class CoreController extends ApiController
 {
@@ -66,6 +69,23 @@ class CoreController extends ApiController
 		// Reload the update information
 		$model->getJoomlaUpdateInfo(true);
 
+		$this->app->setHeader('status', 200);
+	}
+
+	public function downloadUpdate()
+	{
+		/** @var CoreModel $model */
+		$model = $this->getModel();
+
+		$result       = $model->download();
+		$result['id'] = 0;
+
+		$serializer = new JoomlaSerializer('coreupdatedownload');
+		$element    = (new Resource((object) $result, $serializer))
+			->fields(array_keys($result));
+
+		$this->app->getDocument()->setData($element);
+		$this->app->getDocument()->addLink('self', Uri::current());
 		$this->app->setHeader('status', 200);
 	}
 

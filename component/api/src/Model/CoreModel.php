@@ -200,6 +200,25 @@ class CoreModel extends BaseDatabaseModel
 		$model->applyUpdateSite();
 	}
 
+	/**
+	 * Downloads an update package and returns its information
+	 *
+	 * @return array{basename: string, check: bool}
+	 * @throws Exception
+	 * @since  1.0.0
+	 */
+	public function download(): array
+	{
+		/** @var MVCFactory $comJUFactory */
+		$comJUFactory = Factory::getApplication()->bootComponent('com_joomlaupdate')->getMVCFactory();
+		/** @var UpdateModel $model */
+		$model = $comJUFactory->createModel('Update', 'Administrator');
+
+		$result = $model->download();
+
+		return $result;
+	}
+
 	private function getCoreExtensionID(): int
 	{
 		return $this->coreExtensionID =
