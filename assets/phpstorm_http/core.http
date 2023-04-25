@@ -9,3 +9,27 @@ GET {{endpoint}}/v1/panopticon/core/update?force=1
 Authorization: Bearer {{api_token}}
 Accept: application/vnd.api+json
 User-Agent: FooBar/1.0
+
+### Apply the update site
+POST {{endpoint}}/v1/panopticon/core/update
+Authorization: Bearer {{api_token}}
+Accept: application/vnd.api+json
+User-Agent: FooBar/1.0
+
+### Change the update source to Testing
+POST {{endpoint}}/v1/panopticon/core/update
+Authorization: Bearer {{api_token}}
+Accept: application/vnd.api+json
+User-Agent: FooBar/1.0
+Content-Type: application/x-www-form-urlencoded
+
+updatesource=testing
+
+### Change the update source to Default
+POST {{endpoint}}/v1/panopticon/core/update
+Authorization: Bearer {{api_token}}
+Accept: application/vnd.api+json
+User-Agent: FooBar/1.0
+Content-Type: application/x-www-form-urlencoded
+
+updatesource=nochange

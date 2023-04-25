@@ -10,6 +10,7 @@ namespace Akeeba\Component\Panopticon\Api\Model;
 defined('_JEXEC') || die;
 
 use Exception;
+use Joomla\CMS\Cache\CacheControllerFactoryInterface;
 use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Factory\MVCFactory;
@@ -17,7 +18,10 @@ use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use Joomla\CMS\Updater\Updater;
 use Joomla\CMS\Version;
 use Joomla\Component\Installer\Administrator\Table\UpdatesiteTable;
+use Joomla\Component\Joomlaupdate\Administrator\Model\UpdateModel;
+use Joomla\Database\DatabaseDriver;
 use Joomla\Database\ParameterType;
+use Joomla\Registry\Registry;
 use Throwable;
 
 class CoreModel extends BaseDatabaseModel
@@ -150,6 +154,50 @@ class CoreModel extends BaseDatabaseModel
 		}
 
 		return $updateInfo;
+	}
+
+	public function changeUpdateSource(string $updateSource, ?string $updateURL): void
+	{
+		// Sanity check
+		if (!in_array($updateSource, ['nochange', 'next', 'testing', 'custom']))
+		{
+			return;
+		}
+
+		// Get the current parameters
+		$params = ComponentHelper::getParams('com_joomlaupdate');
+
+		$currentUpdateSource = $params->get('updatesource');
+		$currentUrl          = $params->get('customurl');
+
+		// If there is no change, take no action
+		if (
+			($currentUpdateSource === $updateSource && $updateSource != 'custom')
+			|| ($currentUpdateSource === $updateSource && $updateSource === 'custom' && $currentUrl === $updateURL)
+		)
+		{
+			return;
+		}
+
+		// Update the component parameters
+		$params->set('updatesource', $updateSource);
+
+		if ($updateSource === 'custom')
+		{
+			$params->set('customurl', $updateURL);
+		}
+
+		// Save the parameters to the database
+		$this->saveComponentParameters('com_joomlaupdate', $params);
+	}
+
+	public function applyUpdateSource(): void
+	{
+		/** @var MVCFactory $comJUFactory */
+		$comJUFactory = Factory::getApplication()->bootComponent('com_joomlaupdate')->getMVCFactory();
+		/** @var UpdateModel $model */
+		$model = $comJUFactory->createModel('Update', 'Administrator');
+		$model->applyUpdateSite();
 	}
 
 	private function getCoreExtensionID(): int
@@ -316,5 +364,63 @@ class CoreModel extends BaseDatabaseModel
 		}
 
 		return 'dev';
+	}
+
+	private function saveComponentParameters(string $component, Registry $params): void
+	{
+		/** @var DatabaseDriver $db */
+		$db           = Factory::getContainer()->get('DatabaseDriver');
+		$paramsString = $params->toString('JSON');
+		$query        = $db->getQuery(true)
+			->update($db->quoteName('#__extensions'))
+			->set($db->quoteName('params') . ' = :params')
+			->where(
+				[
+					$db->quoteName('element') . ' = :component',
+					$db->quoteName('type') . ' = ' . $db->quote('component'),
+				]
+			)
+			->bind(':params', $paramsString, ParameterType::STRING)
+			->bind(':component', $component, ParameterType::STRING);
+
+		$db->setQuery($query)->execute();
+
+		// Clear the _system cache
+		$this->clearCacheGroup('_system');
+
+		// Update internal Joomla data
+		$refClass = new \ReflectionClass(ComponentHelper::class);
+		$refProp  = $refClass->getProperty('components');
+		$refProp->setAccessible(true);
+
+		$components                     = $refProp->getValue();
+		$components[$component]->params = $params;
+
+		$refProp->setValue($components);
+	}
+
+	private function clearCacheGroup(string $group): void
+	{
+		$app = Factory::getApplication();
+
+		$options = [
+			'defaultgroup' => $group,
+			'cachebase'    => $app->get('cache_path', JPATH_CACHE),
+			'result'       => true,
+		];
+
+		$cacheControllerFactory = Factory::getContainer()->get(CacheControllerFactoryInterface::class);
+
+		try
+		{
+			$cacheControllerFactory
+				->createCacheController('callback', $options)
+				->cache
+				->clean();
+		}
+		catch (Throwable $e)
+		{
+			// Do nothing
+		}
 	}
 }
