@@ -13,18 +13,21 @@ use Exception;
 use Joomla\CMS\Cache\CacheControllerFactoryInterface;
 use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
+use Joomla\CMS\Filesystem\File;
 use Joomla\CMS\MVC\Factory\MVCFactory;
-use Joomla\CMS\MVC\Model\BaseDatabaseModel;
+use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Updater\Updater;
+use Joomla\CMS\User\UserHelper;
 use Joomla\CMS\Version;
 use Joomla\Component\Installer\Administrator\Table\UpdatesiteTable;
 use Joomla\Component\Joomlaupdate\Administrator\Model\UpdateModel;
 use Joomla\Database\DatabaseDriver;
 use Joomla\Database\ParameterType;
 use Joomla\Registry\Registry;
+use ReflectionClass;
 use Throwable;
 
-class CoreModel extends BaseDatabaseModel
+class CoreModel extends UpdateModel
 {
 	private $coreExtensionID = null;
 
@@ -191,33 +194,217 @@ class CoreModel extends BaseDatabaseModel
 		$this->saveComponentParameters('com_joomlaupdate', $params);
 	}
 
-	public function applyUpdateSource(): void
-	{
-		/** @var MVCFactory $comJUFactory */
-		$comJUFactory = Factory::getApplication()->bootComponent('com_joomlaupdate')->getMVCFactory();
-		/** @var UpdateModel $model */
-		$model = $comJUFactory->createModel('Update', 'Administrator');
-		$model->applyUpdateSite();
-	}
-
 	/**
-	 * Downloads an update package and returns its information
+	 * This method had to be forked to avoid the use of JPATH_ADMINISTRATOR_COMPONENT
 	 *
-	 * @return array{basename: string, check: bool}
-	 * @throws Exception
-	 * @since  1.0.0
+	 * @param   string|null  $basename
+	 *
+	 * @return  void
+	 * @throws  Exception
+	 * @since   1.0.0
 	 */
-	public function download(): array
+	public function createUpdateFile($basename = null): bool
 	{
-		/** @var MVCFactory $comJUFactory */
-		$comJUFactory = Factory::getApplication()->bootComponent('com_joomlaupdate')->getMVCFactory();
-		/** @var UpdateModel $model */
-		$model = $comJUFactory->createModel('Update', 'Administrator');
+		// Load overrides plugin.
+		PluginHelper::importPlugin('installer');
 
-		$result = $model->download();
+		// Get a password
+		$password = UserHelper::genRandomPassword(32);
+		$app      = Factory::getApplication();
+
+		// Trigger event before joomla update.
+		$app->triggerEvent('onJoomlaBeforeUpdate');
+
+		// Get the absolute path to site's root.
+		$siteroot = JPATH_SITE;
+
+		// If the package name is not specified, get it from the update info.
+		if (empty($basename))
+		{
+			$updateInfo = $this->getUpdateInformation();
+			$packageURL = $updateInfo['object']->downloadurl->_data;
+			$basename   = basename($packageURL);
+		}
+
+		if (empty($basename))
+		{
+			throw new \RuntimeException('The update package\'s file name cannot be determined automatically.', 400);
+		}
+
+		// Get the package name.
+		$config  = $app->getConfig();
+		$tempdir = $config->get('tmp_path');
+		$file    = $tempdir . '/' . $basename;
+
+		$filesize = @filesize($file);
+		$this->setState('password', $password);
+		$this->setState('filesize', $filesize);
+		$this->setState('file', $basename);
+		$app->setUserState('com_joomlaupdate.password', $password);
+		$app->setUserState('com_joomlaupdate.filesize', $filesize);
+
+		if (version_compare(JVERSION, '4.0.4', 'lt'))
+		{
+			$data = "<?php\ndefined('_AKEEBA_RESTORATION') or die('Restricted access');\n";
+			$data .= '$restoration_setup = array(' . "\n";
+			$data .= <<<ENDDATA
+	'kickstart.security.password' => '$password',
+	'kickstart.tuning.max_exec_time' => '5',
+	'kickstart.tuning.run_time_bias' => '75',
+	'kickstart.tuning.min_exec_time' => '0',
+	'kickstart.procengine' => 'direct',
+	'kickstart.setup.sourcefile' => '$file',
+	'kickstart.setup.destdir' => '$siteroot',
+	'kickstart.setup.restoreperms' => '0',
+	'kickstart.setup.filetype' => 'zip',
+	'kickstart.setup.dryrun' => '0',
+	'kickstart.setup.renamefiles' => array(),
+	'kickstart.setup.postrenamefiles' => false
+ENDDATA;
+
+			$data .= ');';
+
+			$configpath = JPATH_ADMINISTRATOR . '/components/com_joomlaupdate/restoration.php';
+		}
+		else
+		{
+			$data = "<?php\ndefined('_JOOMLA_UPDATE') or die('Restricted access');\n";
+			$data .= '$extractionSetup = [' . "\n";
+			$data .= <<<ENDDATA
+	'security.password' => '$password',
+	'setup.sourcefile' => '$file',
+	'setup.destdir' => '$siteroot',
+ENDDATA;
+
+			$data .= '];';
+
+			// Remove the old file, if it's there...
+			$configpath = JPATH_ADMINISTRATOR . '/components/com_joomlaupdate/update.php';
+		}
+
+
+		if (File::exists($configpath))
+		{
+			if (!File::delete($configpath))
+			{
+				File::invalidateFileCache($configpath);
+				@unlink($configpath);
+			}
+		}
+
+		// Write new file. First try with File.
+		$result = File::write($configpath, $data);
+
+		// In case File used FTP but direct access could help.
+		if (!$result)
+		{
+			if (function_exists('file_put_contents'))
+			{
+				$result = @file_put_contents($configpath, $data);
+
+				if ($result !== false)
+				{
+					$result = true;
+				}
+			}
+			else
+			{
+				$fp = @fopen($configpath, 'wt');
+
+				if ($fp !== false)
+				{
+					$result = @fwrite($fp, $data);
+
+					if ($result !== false)
+					{
+						$result = true;
+					}
+
+					@fclose($fp);
+				}
+			}
+		}
 
 		return $result;
 	}
+
+	public function removeExtractPasswordFile()
+	{
+		$basePath = JPATH_ADMINISTRATOR . '/components/com_joomlaupdate';
+
+		if (File::exists($basePath . '/update.php'))
+		{
+			File::delete($basePath . '/update.php');
+		}
+
+		if (File::exists($basePath . '/restoration.php'))
+		{
+			File::delete($basePath . '/restoration.php');
+		}
+	}
+
+	/**
+	 * This method had to be forked to avoid the use of JPATH_ADMINISTRATOR_COMPONENT
+	 *
+	 * @return  void
+	 * @throws  Exception
+	 * @since   1.0.0
+	 */
+	public function cleanUp()
+	{
+		$basePath = JPATH_ADMINISTRATOR . '/components/com_joomlaupdate';
+
+		// Load overrides plugin.
+		PluginHelper::importPlugin('installer');
+
+		$app = Factory::getApplication();
+
+		// Trigger event after joomla update.
+		$app->triggerEvent('onJoomlaAfterUpdate');
+
+		// Remove the update package.
+		$tempdir = $app->get('tmp_path');
+		$file    = $app->getUserState('com_joomlaupdate.file', null) ?: $this->getZipFilenameFromPasswordFile();
+
+		if (!empty($file))
+		{
+			File::delete($tempdir . '/' . $file);
+		}
+
+		// Remove the update.php file used in Joomla 4.0.3 and later.
+		if (File::exists($basePath . '/update.php'))
+		{
+			File::delete($basePath . '/update.php');
+		}
+
+		// Remove the legacy restoration.php file (when updating from Joomla 4.0.2 and earlier).
+		if (File::exists($basePath . '/restoration.php'))
+		{
+			File::delete($basePath . '/restoration.php');
+		}
+
+		// Remove the legacy restore_finalisation.php file used in Joomla 4.0.2 and earlier.
+		if (File::exists($basePath . '/restore_finalisation.php'))
+		{
+			File::delete($basePath . '/restore_finalisation.php');
+		}
+
+		// Remove joomla.xml from the site's root.
+		if (File::exists(JPATH_ROOT . '/joomla.xml'))
+		{
+			File::delete(JPATH_ROOT . '/joomla.xml');
+		}
+
+		// Unset the update filename from the session.
+		$app = Factory::getApplication();
+		$app->setUserState('com_joomlaupdate.file', null);
+		$oldVersion = $app->getUserState('com_joomlaupdate.oldversion');
+
+		// Trigger event after joomla update.
+		$app->triggerEvent('onJoomlaAfterUpdate', [$oldVersion]);
+		$app->setUserState('com_joomlaupdate.oldversion', null);
+	}
+
 
 	private function getCoreExtensionID(): int
 	{
@@ -408,7 +595,7 @@ class CoreModel extends BaseDatabaseModel
 		$this->clearCacheGroup('_system');
 
 		// Update internal Joomla data
-		$refClass = new \ReflectionClass(ComponentHelper::class);
+		$refClass = new ReflectionClass(ComponentHelper::class);
 		$refProp  = $refClass->getProperty('components');
 		$refProp->setAccessible(true);
 
@@ -441,5 +628,55 @@ class CoreModel extends BaseDatabaseModel
 		{
 			// Do nothing
 		}
+	}
+
+	private function getZipFilenameFromPasswordFile(): ?string
+	{
+		// Joomla 4.0.0 to 4.0.3 — using the old version of Akeeba Restore I contributed to the core back in 2011.
+		if (version_compare(JVERSION, '4.0.4', 'lt'))
+		{
+			if (!defined('_AKEEBA_RESTORATION'))
+			{
+				define('_AKEEBA_RESTORATION', 1);
+			}
+
+			$configPath = JPATH_ADMINISTRATOR . '/components/com_joomlaupdate/restoration.php';
+
+			if (is_file($configPath) && is_readable($configPath))
+			{
+				try
+				{
+					@include_once $configPath;
+				}
+				catch (Throwable $e)
+				{
+					return null;
+				}
+			}
+
+			return $restoration_setup['kickstart.setup.sourcefile'] ?? null;
+		}
+
+		// Joomla 4.0.4 or later — using the modern extract.php I contributed to the core back in late 2020.
+		if (!defined('_JOOMLA_UPDATE'))
+		{
+			define('_JOOMLA_UPDATE', 1);
+		}
+
+		$configPath = JPATH_ADMINISTRATOR . '/components/com_joomlaupdate/update.php';
+
+		if (is_file($configPath) && is_readable($configPath))
+		{
+			try
+			{
+				@include_once $configPath;
+			}
+			catch (Throwable $e)
+			{
+				return null;
+			}
+		}
+
+		return $extractionSetup['setup.sourcefile'] ?? null;
 	}
 }

@@ -39,3 +39,27 @@ POST {{endpoint}}/v1/panopticon/core/update/download
 Authorization: Bearer {{api_token}}
 Accept: application/vnd.api+json
 User-Agent: FooBar/1.0
+
+### Activate the extraction script
+POST {{endpoint}}/v1/panopticon/core/update/activate
+Authorization: Bearer {{api_token}}
+Accept: application/vnd.api+json
+User-Agent: FooBar/1.0
+Content-Type: application/x-www-form-urlencoded
+
+basename=Joomla_4.3.0-Stable-Update_Package.zip
+
+### Post-update code
+POST {{endpoint}}/v1/panopticon/core/update/postupdate
+Authorization: Bearer {{api_token}}
+Accept: application/vnd.api+json
+User-Agent: FooBar/1.0
+Content-Type: application/x-www-form-urlencoded
+
+basename=Joomla_4.3.0-Stable-Update_Package.zip
+
+### Disable the extraction script
+POST {{endpoint}}/v1/panopticon/core/update/disable
+Authorization: Bearer {{api_token}}
+Accept: application/vnd.api+json
+User-Agent: FooBar/1.0

@@ -87,19 +87,19 @@ Params:
 
 Download the core update package to the server
 
-#### POST /v1/panopticon/core/update/activate
+#### ✅ POST /v1/panopticon/core/update/activate
 
 Enable `administrator/components/com_joomlaupdate/extract.php` or `administrator/components/com_joomlaupdate/restore.php`
 
 Note: the extraction and initial post-update processing is done using extract.php
 
-#### POST /v1/panopticon/core/update/disable
+#### ✅ POST /v1/panopticon/core/update/disable
 
 Disable `administrator/components/com_joomlaupdate/extract.php` or `administrator/components/com_joomlaupdate/restore.php`
 
 This should only be used for testing the communication with this file. Otherwise, it will be disabled automatically by Joomla.
 
-#### POST /v1/panopticon/core/update/postupdate
+#### ✅ POST /v1/panopticon/core/update/postupdate
 
 Run the post-update code
 
