@@ -65,6 +65,7 @@ class CoreModel extends UpdateModel
 			'currentStability'    => $this->detectStability($jVersion->getShortVersion()),
 			'latest'              => $jVersion->getShortVersion(),
 			'latestStability'     => $this->detectStability($jVersion->getShortVersion()),
+			'needsUpdate'         => false,
 			'details'             => null,
 			'info'                => null,
 			'changelog'           => null,
@@ -74,6 +75,7 @@ class CoreModel extends UpdateModel
 			'minimumStability'    => $this->stabilityToString($minimumStability),
 			'updateSiteUrl'       => null,
 			'lastUpdateTimestamp' => null,
+			'phpVersion'          => PHP_VERSION,
 		];
 
 		// Get the file_joomla pseudo-extension's ID
@@ -154,6 +156,7 @@ class CoreModel extends UpdateModel
 			$updateInfo->details         = $latest->detailsurl;
 			$updateInfo->info            = $latest->infourl;
 			$updateInfo->changelog       = $latest->changelogurl;
+			$updateInfo->needsUpdate     = version_compare($latest->version, $updateInfo->current, 'gt');
 		}
 
 		return $updateInfo;

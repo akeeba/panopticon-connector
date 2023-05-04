@@ -28,6 +28,7 @@ class JsonapiView extends BaseJsonApiView
 				'currentStability',
 				'latest',
 				'latestStability',
+				'needsUpdate',
 				'details',
 				'info',
 				'changelog',
@@ -37,6 +38,7 @@ class JsonapiView extends BaseJsonApiView
 				'minimumStability',
 				'updateSiteUrl',
 				'lastUpdateTimestamp',
+				'phpVersion'
 			];
 		}
 
