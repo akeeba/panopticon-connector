@@ -1,0 +1,11 @@
+### Changed default frontend template overrides
+GET {{endpoint}}/v1/panopticon/template/overrides/changed?client=0&page[limit]=1000
+Authorization: Bearer {{api_token}}
+Accept: application/vnd.api+json
+User-Agent: FooBar/1.0
+
+### Changed default backend template overrides
+GET {{endpoint}}/v1/panopticon/template/overrides/changed?client=1&page[limit]=1000
+Authorization: Bearer {{api_token}}
+Accept: application/vnd.api+json
+User-Agent: FooBar/1.0
