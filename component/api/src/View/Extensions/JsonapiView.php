@@ -15,6 +15,7 @@ class JsonapiView extends BaseJsonApiView
 {
 	protected $fieldsToRenderList = [
 		"extension_id",
+		"package_id",
 		"type",
 		"folder",
 		"element",
@@ -43,6 +44,7 @@ class JsonapiView extends BaseJsonApiView
 
 	protected $fieldsToRenderItem = [
 		"extension_id",
+		"package_id",
 		"type",
 		"folder",
 		"element",

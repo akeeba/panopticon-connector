@@ -51,11 +51,21 @@ class ExtensionsModel extends ListModel
 				$db->quoteName('u.changelogurl'),
 			])
 			->from($db->quoteName('#__extensions', 'e'))
-			->leftJoin(
+			->join(
+				'LEFT OUTER',
 				$db->quoteName('#__updates', 'u'),
 				$db->quoteName('u.extension_id') . ' = ' . $db->quoteName('e.extension_id')
 			)
-			->where($db->quoteName('package_id') . ' = 0');
+			->where(
+				[
+					$db->quoteName('e.package_id') . ' = 0',
+					'(' .
+						$db->quoteName('e.locked') . ' != 1 OR ' .
+						'(' . $db->quoteName('e.type') . ' = ' . $db->quote('file') . ' AND ' . $db->quoteName('e.element') . ' = ' . $db->quote('joomla') . ')'
+					. ')'
+				]
+			)
+			;
 
 		if (is_int($protected) && $protected >= 0)
 		{
