@@ -154,7 +154,7 @@ class CoreModel extends UpdateModel
 			function($carry, $item) {
 				return is_null($carry)
 					? $item
-					: (version_compare($carry->version, $item->version, 'lt') ? $item : $carry)
+					: (version_compare($carry->version, $item->version, 'lt') ? $item : $carry);
 			},
 			null
 		);
