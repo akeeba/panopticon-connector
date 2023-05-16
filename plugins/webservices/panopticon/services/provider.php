@@ -33,7 +33,11 @@ return new class implements ServiceProviderInterface {
 				$dispatcher    = $container->get(DispatcherInterface::class);
 				$plugin        = new Panopticon($dispatcher, $pluginsParams);
 
-				$plugin->setApplication(Factory::getApplication());
+				// Joomla 4.2 and later
+				if (method_exists($plugin, 'setApplication'))
+				{
+					$plugin->setApplication(Factory::getApplication());
+				}
 
 				return $plugin;
 			}
