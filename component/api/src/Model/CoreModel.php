@@ -142,12 +142,22 @@ class CoreModel extends UpdateModel
 
 		try
 		{
-			$latest = $db->setQuery($query, 0, 1)->loadObject() ?: null;
+			$allLatest = $db->setQuery($query)->loadObjectList() ?: null;
 		}
 		catch (Throwable $e)
 		{
-			$latest = null;
+			$allLatest = null;
 		}
+
+		$latest = array_reduce(
+			$allLatest ?: [],
+			function($carry, $item) {
+				return is_null($carry)
+					? $item
+					: (version_compare($carry->version, $item->version, 'lt') ? $item : $carry)
+			},
+			null
+		);
 
 		if (is_object($latest))
 		{
