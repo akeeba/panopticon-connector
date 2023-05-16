@@ -37,10 +37,8 @@ use Throwable;
  * - Executing custom, extension-specific upgrade tasks.
  */
 #[\AllowDynamicProperties]
-class UpgradeModel extends BaseDatabaseModel implements DatabaseAwareInterface
+class UpgradeModel extends BaseDatabaseModel
 {
-	use DatabaseAwareTrait;
-
 	/**
 	 * Name of the package being replaced
 	 *
@@ -264,7 +262,7 @@ class UpgradeModel extends BaseDatabaseModel implements DatabaseAwareInterface
 			return $this->extensionIds[$extension];
 		}
 
-		$db    = $this->getDatabase();
+		$db    = method_exists($this, 'getDatabase') ? $this->getDatabase() : $this->getDbo();
 		$query = $db->getQuery(true)
 			->select($db->quoteName('extension_id'))
 			->from($db->quoteName('#__extensions'));
@@ -336,7 +334,7 @@ class UpgradeModel extends BaseDatabaseModel implements DatabaseAwareInterface
 		$extensionIDs = array_merge($extensionIDs);
 
 		// Reassign all extensions
-		$db    = $this->getDatabase();
+		$db    = method_exists($this, 'getDatabase') ? $this->getDatabase() : $this->getDbo();
 		$query = $db->getQuery(true)
 			->update($db->quoteName('#__extensions'))
 			->set($db->qn('package_id') . ' = :package_id')
@@ -408,7 +406,7 @@ class UpgradeModel extends BaseDatabaseModel implements DatabaseAwareInterface
 			return;
 		}
 
-		$db    = $this->getDatabase();
+		$db    = method_exists($this, 'getDatabase') ? $this->getDatabase() : $this->getDbo();
 		$query = $db->getQuery(true)
 			->update($db->quoteName('#__extensions'))
 			->set($db->qn('enabled') . ' = 1')
@@ -643,7 +641,7 @@ class UpgradeModel extends BaseDatabaseModel implements DatabaseAwareInterface
 		$extensionIDs = array_merge($extensionIDs);
 
 		// Reassign all extensions
-		$db    = $this->getDatabase();
+		$db    = method_exists($this, 'getDatabase') ? $this->getDatabase() : $this->getDbo();
 		$query = $db->getQuery(true)
 			->update($db->quoteName('#__extensions'))
 			->set($db->qn('package_id') . ' = :package_id')
@@ -674,7 +672,7 @@ class UpgradeModel extends BaseDatabaseModel implements DatabaseAwareInterface
 
 		// Get the existing list of extensions dependent on the specified version of FOF.
 		$keyName = 'fof' . $fofVersion . '0';
-		$db      = $this->getDatabase();
+		$db      = method_exists($this, 'getDatabase') ? $this->getDatabase() : $this->getDbo();
 		$query   = $db->getQuery(true)
 			->select($db->quoteName('value'))
 			->from($db->quoteName('#__akeeba_common'))
@@ -1021,7 +1019,7 @@ class UpgradeModel extends BaseDatabaseModel implements DatabaseAwareInterface
 
 		// Get an Extension table object and Installer object.
 		/** @noinspection PhpParamsInspection */
-		$row       = new Extension($this->getDatabase());
+		$row       = new Extension(method_exists($this, 'getDatabase') ? $this->getDatabase() : $this->getDbo());
 		$installer = Installer::getInstance();
 
 		// Load the extension row or fail the uninstallation immediately.
@@ -1130,7 +1128,7 @@ class UpgradeModel extends BaseDatabaseModel implements DatabaseAwareInterface
 			}
 
 			// Add the custom handler, passing a reference to ourselves
-			$this->customHandlers[$bareNameCanonical] = new $classFQN($this, $this->getDatabase());
+			$this->customHandlers[$bareNameCanonical] = new $classFQN($this, method_exists($this, 'getDatabase') ? $this->getDatabase() : $this->getDbo());
 		}
 	}
 
