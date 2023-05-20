@@ -23,7 +23,6 @@
 
         <files folder="backend">
             <filename>config.xml</filename>
-            <filename>version.php</filename>
 
             <folder>language</folder>
             <folder>services</folder>
