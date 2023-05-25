@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<project name="panopticon" description="Akeeba Panopticon" default="git">
+<project name="panopticon" description="Akeeba Panopticon Connector" default="git">
     <import file="${phing.dir}/../buildfiles/phing/common.xml"/>
 
     <!-- Override properties set up in common.xml -->
