@@ -228,7 +228,7 @@ class ExtensionsModel extends ListModel
 		}
 
 		// Add Update Site information for each extension
-		$updateSites = $this->getUpdateSitesForExtensions(
+		$updateSites = empty($items) ? [] : $this->getUpdateSitesForExtensions(
 			array_map(
 				function ($item) {
 					return $item->extension_id;
@@ -270,7 +270,7 @@ class ExtensionsModel extends ListModel
 		$db    = method_exists($this, 'getDatabase') ? $this->getDatabase() : $this->getDbo();
 		$query = $db->getQuery(true)
 			->select('*')
-			->from('#__update_sites_extensions')
+			->from($db->quoteName('#__update_sites_extensions'))
 			->whereIn($db->quoteName('extension_id'), $eids, ParameterType::INTEGER);
 
 		try
