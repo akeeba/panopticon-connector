@@ -10,12 +10,15 @@ namespace Akeeba\Component\Panopticon\Api\Model;
 defined('_JEXEC') || die;
 
 use Exception;
+use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\CMS\MVC\Model\ListModel;
 use Joomla\CMS\Object\CMSObject;
+use Joomla\CMS\Updater\Updater;
 use Joomla\Component\Installer\Administrator\Helper\InstallerHelper;
+use Joomla\Component\Installer\Administrator\Model\UpdateModel;
 use Joomla\Database\ParameterType;
 use stdClass;
 
@@ -95,6 +98,28 @@ class ExtensionsModel extends ListModel
 
 	protected function _getList($query, $limitstart = 0, $limit = 0)
 	{
+		// Force-reload the update before listing extensions?
+		if ($this->getState('filter.force', false))
+		{
+			/** @var UpdateModel $model */
+			$model = Factory::getApplication()
+							->bootComponent('com_installer')
+							->getMVCFactory()
+							->createModel('update', 'Administrator');
+
+			// Get the updates caching duration.
+			$params       = ComponentHelper::getComponent('com_installer')->getParams();
+			$cacheTimeout = 3600 * ((int)$params->get('cachetimeout', 6));
+
+			// Get the minimum stability.
+			$minimumStability = (int)$params->get('minimum_stability', Updater::STABILITY_STABLE);
+
+			// Purge the table before checking again.
+			$model->purge();
+
+			$model->findUpdates(0, $cacheTimeout, $minimumStability);
+		}
+
 		// Get all items from the database. We deliberately don't apply any limits just yet.
 		$items = parent::_getList($query);
 
