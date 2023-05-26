@@ -38,7 +38,8 @@ class JsonapiView extends BaseJsonApiView
 				'minimumStability',
 				'updateSiteUrl',
 				'lastUpdateTimestamp',
-				'phpVersion'
+				'phpVersion',
+				'panopticon'
 			];
 		}
 

@@ -55,12 +55,21 @@ class CoreModel extends UpdateModel
 	{
 		// Get the update parameters from the com_installer configuration
 		$params           = ComponentHelper::getComponent('com_installer')->getParams();
-		$cacheHours       = (int) $params->get('cachetimeout', 6);
+		$cacheHours       = (int)$params->get('cachetimeout', 6);
 		$cacheTimeout     = 3600 * $cacheHours;
-		$minimumStability = (int) $params->get('minimum_stability', Updater::STABILITY_STABLE);
+		$minimumStability = (int)$params->get('minimum_stability', Updater::STABILITY_STABLE);
+
+		if (!defined('AKEEBA_PANOPTICON_VERSION'))
+		{
+			@include_once JPATH_ADMINISTRATOR . '/components/com_panopticon/version.php';
+		}
+
+		$version  = defined('AKEEBA_PANOPTICON_VERSION') ? AKEEBA_PANOPTICON_VERSION : '0.0.0-dev1';
+		$date     = defined('AKEEBA_PANOPTICON_DATE') ? AKEEBA_PANOPTICON_DATE : gmdate('Y-m-d');
+		$apiLevel = defined('AKEEBA_PANOPTICON_API') ? AKEEBA_PANOPTICON_API : 100;
 
 		$jVersion   = new Version();
-		$updateInfo = (object) [
+		$updateInfo = (object)[
 			'current'             => $jVersion->getShortVersion(),
 			'currentStability'    => $this->detectStability($jVersion->getShortVersion()),
 			'latest'              => $jVersion->getShortVersion(),
@@ -76,6 +85,11 @@ class CoreModel extends UpdateModel
 			'updateSiteUrl'       => null,
 			'lastUpdateTimestamp' => null,
 			'phpVersion'          => PHP_VERSION,
+			'panopticon'          => [
+				'version' => $version,
+				'date'    => $date,
+				'api'     => $apiLevel,
+			],
 		];
 
 		// Get the file_joomla pseudo-extension's ID
@@ -107,7 +121,8 @@ class CoreModel extends UpdateModel
 		if ($updateSiteTable->load(
 			array_reduce(
 				$updateSiteIDs,
-				function (int $carry, int $item) {
+				function (int $carry, int $item)
+				{
 					return min($carry, $item);
 				},
 				PHP_INT_MAX
@@ -129,16 +144,16 @@ class CoreModel extends UpdateModel
 
 		$db    = method_exists($this, 'getDatabase') ? $this->getDatabase() : $this->getDbo();
 		$query = $db->getQuery(true)
-			->select($db->quoteName([
-				'version',
-				'detailsurl',
-				'infourl',
-				'changelogurl',
-			]))
-			->from($db->quoteName('#__updates'))
-			->where($db->quoteName('extension_id') . ' = :eid')
-			->order($db->quoteName('update_id') . ' DESC')
-			->bind(':eid', $eid, ParameterType::INTEGER);
+					->select($db->quoteName([
+						'version',
+						'detailsurl',
+						'infourl',
+						'changelogurl',
+					]))
+					->from($db->quoteName('#__updates'))
+					->where($db->quoteName('extension_id') . ' = :eid')
+					->order($db->quoteName('update_id') . ' DESC')
+					->bind(':eid', $eid, ParameterType::INTEGER);
 
 		try
 		{
@@ -151,7 +166,8 @@ class CoreModel extends UpdateModel
 
 		$latest = array_reduce(
 			$allLatest ?: [],
-			function($carry, $item) {
+			function ($carry, $item)
+			{
 				return is_null($carry)
 					? $item
 					: (version_compare($carry->version, $item->version, 'lt') ? $item : $carry);
@@ -445,10 +461,10 @@ ENDDATA;
 
 		$db    = method_exists($this, 'getDatabase') ? $this->getDatabase() : $this->getDbo();
 		$query = $db->getQuery(true)
-			->select($db->quoteName('update_site_id'))
-			->from($db->quoteName('#__update_sites_extensions'))
-			->where($db->quoteName('extension_id') . ' = :eid')
-			->bind(':eid', $eid, ParameterType::INTEGER);
+					->select($db->quoteName('update_site_id'))
+					->from($db->quoteName('#__update_sites_extensions'))
+					->where($db->quoteName('extension_id') . ' = :eid')
+					->bind(':eid', $eid, ParameterType::INTEGER);
 
 		try
 		{
@@ -466,10 +482,10 @@ ENDDATA;
 
 		// Get enabled core update sites.
 		$query = $db->getQuery(true)
-			->select($db->quoteName('update_site_id'))
-			->from($db->quoteName('#__update_sites'))
-			->whereIn($db->quoteName('update_site_id'), $this->coreUpdateSiteIDs, ParameterType::INTEGER)
-			->where($db->quoteName('enabled') . ' = 1');
+					->select($db->quoteName('update_site_id'))
+					->from($db->quoteName('#__update_sites'))
+					->whereIn($db->quoteName('update_site_id'), $this->coreUpdateSiteIDs, ParameterType::INTEGER)
+					->where($db->quoteName('enabled') . ' = 1');
 
 		try
 		{
@@ -506,9 +522,9 @@ ENDDATA;
 
 		// Clear update records
 		$query = $db->getQuery(true)
-			->delete($db->quoteName('#__updates'))
-			->where($db->quoteName('extension_id') . ' = :eid')
-			->bind(':eid', $eid, ParameterType::INTEGER);
+					->delete($db->quoteName('#__updates'))
+					->where($db->quoteName('extension_id') . ' = :eid')
+					->bind(':eid', $eid, ParameterType::INTEGER);
 
 		try
 		{
@@ -521,9 +537,9 @@ ENDDATA;
 
 		// Reset last check timestamp on update site
 		$query = $db->getQuery(true)
-			->update($db->quoteName('#__update_sites'))
-			->set($db->quoteName('last_check_timestamp') . ' = 0')
-			->whereIn($db->quoteName('update_site_id'), $updateSiteIDs, ParameterType::INTEGER);
+					->update($db->quoteName('#__update_sites'))
+					->set($db->quoteName('last_check_timestamp') . ' = 0')
+					->whereIn($db->quoteName('update_site_id'), $updateSiteIDs, ParameterType::INTEGER);
 
 		try
 		{
@@ -591,16 +607,16 @@ ENDDATA;
 		$db           = Factory::getContainer()->get('DatabaseDriver');
 		$paramsString = $params->toString('JSON');
 		$query        = $db->getQuery(true)
-			->update($db->quoteName('#__extensions'))
-			->set($db->quoteName('params') . ' = :params')
-			->where(
-				[
-					$db->quoteName('element') . ' = :component',
-					$db->quoteName('type') . ' = ' . $db->quote('component'),
-				]
-			)
-			->bind(':params', $paramsString, ParameterType::STRING)
-			->bind(':component', $component, ParameterType::STRING);
+						   ->update($db->quoteName('#__extensions'))
+						   ->set($db->quoteName('params') . ' = :params')
+						   ->where(
+							   [
+								   $db->quoteName('element') . ' = :component',
+								   $db->quoteName('type') . ' = ' . $db->quote('component'),
+							   ]
+						   )
+						   ->bind(':params', $paramsString, ParameterType::STRING)
+						   ->bind(':component', $component, ParameterType::STRING);
 
 		$db->setQuery($query)->execute();
 
