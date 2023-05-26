@@ -12,6 +12,7 @@ defined('_JEXEC') || die;
 use Exception;
 use Joomla\CMS\Cache\CacheControllerFactoryInterface;
 use Joomla\CMS\Component\ComponentHelper;
+use Joomla\CMS\Extension\ExtensionHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Filesystem\File;
 use Joomla\CMS\MVC\Factory\MVCFactory;
@@ -186,6 +187,74 @@ class CoreModel extends UpdateModel
 		}
 
 		return $updateInfo;
+	}
+
+	public function affirmCoreUpdateRecord()
+	{
+		$coreExtension = ExtensionHelper::getExtensionRecord('joomla', 'file');
+
+		if (empty($coreExtension) || !is_object($coreExtension))
+		{
+			return;
+		}
+
+		$id = $coreExtension->extension_id;
+
+		if (empty($id))
+		{
+			return;
+		}
+
+		$db = method_exists($this, 'getDatabase') ? $this->getDatabase() : $this->getDbo();
+
+		// Is there an update site record?
+		$query = $db
+			->getQuery(true)
+			->select($db->quoteName('us.update_site_id'))
+			->from($db->quoteName('#__update_sites_extensions', 'map'))
+			->join(
+				'INNER',
+				$db->quoteName('#__update_sites', 'us'),
+				$db->quoteName('us.update_site_id') . ' = ' . $db->quoteName('map.update_site_id')
+			)
+			->where($db->quoteName('map.extension_id') . ' = :id')
+			->bind(':id', $id, ParameterType::INTEGER);
+
+		$usId = $db->setQuery($query)->loadResult();
+
+		if (!empty($usId))
+		{
+			return;
+		}
+
+		// Create an update site record.
+		$o = (object)[
+			'update_site_id'       => null,
+			'name'                 => 'Joomla! Core',
+			'type'                 => 'collection',
+			'location'             => '',
+			'enabled'              => 1,
+			'last_check_timestamp' => 0,
+			'extra_query'          => '',
+		];
+
+		$db->insertObject('#__update_sites', $o, 'update_site_id');
+
+		// Delete old map records
+		$query = $db
+			->getQuery(true)
+			->delete($db->quoteName('#__update_sites_extensions'))
+			->where($db->quoteName('update_site_id') . ' = :extension_id')
+			->bind(':extension_id', $id);
+		$db->setQuery($query)->execute();
+
+		// Create an update site to extension ID map record
+		$o2 = (object)[
+			'update_site_id' => $o->update_site_id,
+			'extension_id'   => $id,
+		];
+
+		$db->insertObject('#__update_sites_extensions', $o2);
 	}
 
 	public function changeUpdateSource(string $updateSource, ?string $updateURL): void
@@ -433,7 +502,6 @@ ENDDATA;
 		$app->triggerEvent('onJoomlaAfterUpdate', [$oldVersion]);
 		$app->setUserState('com_joomlaupdate.oldversion', null);
 	}
-
 
 	private function getCoreExtensionID(): int
 	{

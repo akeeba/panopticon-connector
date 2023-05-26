@@ -71,6 +71,9 @@ class CoreController extends ApiController
 			$model->changeUpdateSource($updateSource, $updateURL);
 		}
 
+		// Make sure there is a core update record
+		$model->affirmCoreUpdateRecord();
+
 		// Apply the update source
 		$model->applyUpdateSite();
 
