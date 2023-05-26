@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 
+<!--
+  ~ @package   panopticon
+  ~ @copyright Copyright (c)2023-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
+  ~ @license   https://www.gnu.org/licenses/agpl-3.0.txt GNU Affero General Public License, version 3 or later
+  -->
+
 <extension type="package" method="upgrade">
     <name>pkg_panopticon</name>
     <author>Nicholas K. Dionysopoulos</author>
