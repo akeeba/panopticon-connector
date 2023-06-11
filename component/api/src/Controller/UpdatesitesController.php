@@ -128,9 +128,18 @@ class UpdatesitesController extends ApiController
 		$item = $model->getItem($recordKey);
 		$data = array_merge($item->getProperties(), $data);
 
-		if (isset($data['extra_query']))
+		// We have to STRIP the prefix and suffix, because Joomla's base model adds it back (I know, right?!)
+		if (isset($data['extra_query']) && !empty($data['extra_query']))
 		{
-			$data['extra_query'] = $item->downloadIdPrefix . $data['extra_query'] . $item->downloadIdSuffix;
+			if (!empty($item->downloadIdPrefix) && str_starts_with($data['extra_query'], $item->downloadIdPrefix))
+			{
+				$data['extra_query'] = substr($data['extra_query'], strlen($item->downloadIdPrefix));
+			}
+
+			if (!empty($item->downloadIdSuffix) && str_ends_with($data['extra_query'], $item->downloadIdSuffix))
+			{
+				$data['extra_query'] = substr($data['extra_query'], 0, -strlen($item->downloadIdSuffix));
+			}
 		}
 
 		// Attempt to save the data.

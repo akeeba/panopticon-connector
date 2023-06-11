@@ -16,19 +16,22 @@ Authorization: Bearer {{api_token}}
 Accept: application/vnd.api+json
 User-Agent: FooBar/1.0
 
-### Get update site with ID 77
-GET {{endpoint}}/v1/panopticon/updatesite/77
+### Get update site with ID 303
+GET {{endpoint}}/v1/panopticon/updatesite/303
 Authorization: Bearer {{api_token}}
 Accept: application/vnd.api+json
 User-Agent: FooBar/1.0
 
-### Modify update site 104
-PATCH {{endpoint}}/v1/panopticon/updatesite/104
+### Modify update site 303
+PATCH {{endpoint}}/v1/panopticon/updatesite/303
 Authorization: Bearer {{api_token}}
 Accept: application/vnd.api+json
 User-Agent: FooBar/1.0
 Content-Type: application/json
 
+// IMPORTANT:
+// 1. The content is a JSON document, not encoded form data
+// 2. The extra_query is ALWAYS the bare key on Joomla 4 (Joomla adds the prefix and suffix automatically)
 {
 	"enabled": 1,
     "extra_query": "0123456789abcdef0123456789abcdef"

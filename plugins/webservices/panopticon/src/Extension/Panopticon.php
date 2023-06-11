@@ -48,6 +48,7 @@ class Panopticon extends CMSPlugin implements SubscriberInterface
 			$defaults
 		);
 
+		// TODO Determine if we should keep this
 		$routes[] = new Route(
 			['GET'],
 			self::API_PREFIX . 'extension/:id',
@@ -58,6 +59,7 @@ class Panopticon extends CMSPlugin implements SubscriberInterface
 			$defaults
 		);
 
+		// TODO Determine if we should keep this
 		$routes[] = new Route(
 			['GET'],
 			self::API_PREFIX . 'extension/:element',
@@ -68,6 +70,7 @@ class Panopticon extends CMSPlugin implements SubscriberInterface
 			$defaults
 		);
 
+		// TODO Determine if we should keep this
 		$routes[] = new Route(
 			['POST'],
 			self::API_PREFIX . 'updates',
@@ -84,6 +87,7 @@ class Panopticon extends CMSPlugin implements SubscriberInterface
 			$defaults
 		);
 
+		// TODO Determine if we should keep this
 		$routes[] = new Route(
 			['GET'],
 			self::API_PREFIX . 'updatesites',
@@ -92,6 +96,7 @@ class Panopticon extends CMSPlugin implements SubscriberInterface
 			$defaults
 		);
 
+		// TODO Determine if we should keep this
 		$routes[] = new Route(
 			['GET'],
 			self::API_PREFIX . 'updatesite/:id',
@@ -100,6 +105,7 @@ class Panopticon extends CMSPlugin implements SubscriberInterface
 			$defaults
 		);
 
+		// TODO 📋Consumer code in planning stage
 		$routes[] = new Route(
 			['PATCH'],
 			self::API_PREFIX . 'updatesite/:id',
@@ -108,6 +114,7 @@ class Panopticon extends CMSPlugin implements SubscriberInterface
 			$defaults
 		);
 
+		// TODO Determine if we should keep this
 		$routes[] = new Route(
 			['DELETE'],
 			self::API_PREFIX . 'updatesite/:id',
@@ -116,6 +123,7 @@ class Panopticon extends CMSPlugin implements SubscriberInterface
 			$defaults
 		);
 
+		// TODO Determine if we should keep this
 		$routes[] = new Route(
 			['POST'],
 			self::API_PREFIX . 'updatesites/rebuild',
@@ -156,6 +164,7 @@ class Panopticon extends CMSPlugin implements SubscriberInterface
 			$defaults
 		);
 
+		// TODO Determine if we should keep this
 		$routes[] = new Route(
 			['POST'],
 			self::API_PREFIX . 'core/update/disable',
@@ -172,6 +181,7 @@ class Panopticon extends CMSPlugin implements SubscriberInterface
 			$defaults
 		);
 
+		// TODO 📋Consumer code in planning stage
 		$routes[] = new Route(
 			['GET'],
 			self::API_PREFIX . 'template/overrides/changed',
