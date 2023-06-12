@@ -23,6 +23,8 @@ use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Model\BaseModel;
 use Joomla\CMS\Plugin\PluginHelper;
+use Joomla\CMS\Router\Route;
+use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\User\UserHelper;
 use Joomla\Database\DatabaseDriver;
 use Joomla\Database\ParameterType;
@@ -344,6 +346,8 @@ class BackupModel extends BaseModel
 			'installed' => false,
 			'version'   => '0.0.0',
 			'api'       => null,
+			'secret'    => null,
+			'endpoints' => [],
 		];
 
 		$component = $this->getComponentElement();
@@ -357,30 +361,57 @@ class BackupModel extends BaseModel
 		$ret->installed = true;
 		$ret->version   = $this->getComponentVersion($component);
 		$ret->api       = $this->getMaxApiVersion($component);
+		$ret->secret    = $this->getSecret($component);
+		$ret->endpoints = $this->getEndpoints($component);
 
 		return $ret;
 	}
 
-	public function getSecret(): object
+	private function getEndpoints(string $component): ?object
 	{
-		$ret = (object) [
-			'id'     => 0,
-			'secret' => null,
-		];
+		$maxVersion = $this->getMaxApiVersion($component);
+		$baseUri    = rtrim(Uri::base(), '/') . '/';
+		$rootUri    = substr($baseUri, 0, -4);
 
-		$component = $this->getComponentElement();
-
-		if (empty($component))
+		if ($maxVersion >= 3)
 		{
-			return $ret;
+			return (object) [
+				'v3' => [
+					$baseUri . 'index.php/v3/akeebabackup',
+				],
+				'v2' => [
+					$baseUri . 'index.php/v2/akeebabackup/index.php',
+					$rootUri . sprintf('index.php?option=%s&view=Api&format=raw', $component),
+				],
+			];
 		}
 
+		if ($maxVersion == 2)
+		{
+			return (object) [
+				'v2' => [
+					$rootUri . sprintf('index.php?option=%s&view=Api&format=raw', $component),
+				],
+				'v1' => [
+					$rootUri . sprintf('index.php?option=%s&view=json', $component),
+				],
+			];
+		}
+
+		return (object) [
+			'v1' => [
+				Route::link(
+					'site', sprintf('index.php?option=%s&view=json', $component), false, Route::TLS_IGNORE, true
+				),
+			],
+		];
+	}
+
+	private function getSecret(string $component): ?string
+	{
 		$this->ensureFrontendApiEnabled($component);
 
-		$ret->id     = ComponentHelper::getComponent($component)->id;
-		$ret->secret = $this->getDecodedSecret($component) ?: $this->createSecret($component);
-
-		return $ret;
+		return $this->getDecodedSecret($component) ?: $this->createSecret($component);
 	}
 
 	private function getComponentElement(): ?string
@@ -513,13 +544,13 @@ class BackupModel extends BaseModel
 		{
 			// Akeeba Backup 5.6 to 8.x inclusive
 			case 'com_akeeba':
-				$engineRoot = JPATH_ADMINISTRATOR . '/components/com_akeeba/BackupEngine';
+				$engineRoot   = JPATH_ADMINISTRATOR . '/components/com_akeeba/BackupEngine';
 				$platformRoot = JPATH_ADMINISTRATOR . '/components/com_akeeba/BackupPlatform/Joomla3x';
 				break;
 
 			// Akeeba Backup 9.x and later
 			case 'com_akeebabackup':
-				$engineRoot = JPATH_ADMINISTRATOR . '/components/com_akeebabackup/engine';
+				$engineRoot   = JPATH_ADMINISTRATOR . '/components/com_akeebabackup/engine';
 				$platformRoot = JPATH_ADMINISTRATOR . '/components/com_akeebabackup/platform/Joomla';
 				break;
 		}
@@ -543,7 +574,7 @@ class BackupModel extends BaseModel
 		}
 
 		// Make sure we have a profile set throughout the component's lifetime
-		$app = Factory::getApplication();
+		$app        = Factory::getApplication();
 		$profile_id = $app->getSession()->get('akeebabackup.profile', null);
 
 		if (is_null($profile_id))
@@ -580,7 +611,7 @@ class BackupModel extends BaseModel
 	private function createSecret(string $component): ?string
 	{
 		$newSecret = UserHelper::genRandomPassword(32);
-		$params = ComponentHelper::getParams($component);
+		$params    = ComponentHelper::getParams($component);
 		$params->set('frontend_secret_word', $newSecret);
 
 		self::saveParams($params, $component);

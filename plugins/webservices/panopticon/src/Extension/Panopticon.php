@@ -192,16 +192,8 @@ class Panopticon extends CMSPlugin implements SubscriberInterface
 
 		$routes[] = new Route(
 			['GET'],
-			self::API_PREFIX . 'akeebabackup/version',
+			self::API_PREFIX . 'akeebabackup/info',
 			'backup.version',
-			[],
-			$defaults
-		);
-
-		$routes[] = new Route(
-			['GET'],
-			self::API_PREFIX . 'akeebabackup/secret',
-			'backup.secret',
 			[],
 			$defaults
 		);

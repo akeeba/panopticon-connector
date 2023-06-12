@@ -49,27 +49,7 @@ class BackupController extends ApiController
 		$model = $this->getModel();
 
 		$result     = $model->getVersion();
-		$serializer = new JoomlaSerializer('akeebabackupversion');
-		$element    = (new Resource($result, $serializer))
-			->fields(array_keys((array) $result));
-
-		$this->app->getDocument()->setData($element);
-		$this->app->getDocument()->addLink('self', Uri::current());
-		$this->app->setHeader('status', 200);
-	}
-
-	public function secret()
-	{
-		if (!$this->app->getIdentity()->authorise('core.manage', 'com_akeebabackup'))
-		{
-			throw new NotAllowed($this->app->getLanguage()->_('JERROR_ALERTNOAUTHOR'), 403);
-		}
-
-		/** @var BackupModel $model */
-		$model = $this->getModel('Backup');
-
-		$result     = $model->getSecret();
-		$serializer = new JoomlaSerializer('akeebabackupsecret');
+		$serializer = new JoomlaSerializer('akeebabackupinfo');
 		$element    = (new Resource($result, $serializer))
 			->fields(array_keys((array) $result));
 

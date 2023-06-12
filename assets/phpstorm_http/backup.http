@@ -1,12 +1,5 @@
 ### Get basic info about the Akeeba Backup version installed and its support for the Akeeba Backup JSON API
-GET {{endpoint}}/v1/panopticon/akeebabackup/version
+GET {{endpoint}}/v1/panopticon/akeebabackup/info
 Authorization: Bearer {{api_token}}
 Accept: application/vnd.api+json
 User-Agent: FooBar/1.0
-
-### Get the Akeeba Backup JSON API Secret Key
-GET {{endpoint}}/v1/panopticon/akeebabackup/secret
-Authorization: Bearer {{api_token}}
-Accept: application/vnd.api+json
-User-Agent: FooBar/1.0
-
