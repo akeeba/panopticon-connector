@@ -400,9 +400,7 @@ class BackupModel extends BaseModel
 
 		return (object) [
 			'v1' => [
-				Route::link(
-					'site', sprintf('index.php?option=%s&view=json', $component), false, Route::TLS_IGNORE, true
-				),
+				$rootUri . sprintf('index.php?option=%s&view=json', $component),
 			],
 		];
 	}
