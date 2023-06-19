@@ -105,7 +105,6 @@ class Panopticon extends CMSPlugin implements SubscriberInterface
 			$defaults
 		);
 
-		// TODO 📋Consumer code in planning stage
 		$routes[] = new Route(
 			['PATCH'],
 			self::API_PREFIX . 'updatesite/:id',
