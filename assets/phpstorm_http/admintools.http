@@ -1,0 +1,87 @@
+###
+# Unblock an IP address
+POST {{endpoint}}/v1/panopticon/admintools/unblock
+Authorization: Bearer {{api_token}}
+Accept: application/vnd.api+json
+User-Agent: FooBar/1.0
+Content-Type: application/x-www-form-urlencoded
+
+ip=123.234.123.234
+
+###
+# Disable Admin Tools' system plugin (rename `provider.php` to `provider-disable.php`)
+POST {{endpoint}}/v1/panopticon/admintools/plugin/disable
+Authorization: Bearer {{api_token}}
+Accept: application/vnd.api+json
+User-Agent: FooBar/1.0
+
+###
+# Enable Admin Tools' system plugin (rename `provider.php` back, from 'provider-disable.php',
+#			'provider.php.bak',
+#			'provider.bak.php',
+#			'provider.bak',
+#			'-provider.php',
+POST {{endpoint}}/v1/panopticon/admintools/plugin/enable
+Authorization: Bearer {{api_token}}
+Accept: application/vnd.api+json
+User-Agent: FooBar/1.0
+
+###
+# Rename the .htaccess file to .htaccess.admintools
+POST {{endpoint}}/v1/panopticon/admintools/htaccess/disable
+Authorization: Bearer {{api_token}}
+X-Joomla-Token: {{api_token}}
+Accept: application/vnd.api+json
+User-Agent: FooBar/1.0
+
+###
+# Rename .htaccess.admintools back to .htaccess file
+POST {{endpoint}}/v1/panopticon/admintools/htaccess/enable
+Authorization: Bearer {{api_token}}
+X-Joomla-Token: {{api_token}}
+Accept: application/vnd.api+json
+User-Agent: FooBar/1.0
+
+###
+# Create a temporary Super User account
+POST {{endpoint}}/v1/panopticon/admintools/tempsuperuser
+Authorization: Bearer {{api_token}}
+Accept: application/vnd.api+json
+User-Agent: FooBar/1.0
+
+expiration=2023-12-31 20:10:00
+
+###
+# Start the PHP File Change Scanner
+POST {{endpoint}}/v1/panopticon/admintools/startscanner
+Authorization: Bearer {{api_token}}
+Accept: application/vnd.api+json
+User-Agent: FooBar/1.0
+
+###
+# Step throught the PHP File Change Scanner
+POST {{endpoint}}/v1/panopticon/admintools/stepscanner
+Authorization: Bearer {{api_token}}
+Accept: application/vnd.api+json
+User-Agent: FooBar/1.0
+
+###
+# Get a list of all scans, with their status
+GET {{endpoint}}/v1/panopticon/admintools/scans
+Authorization: Bearer {{api_token}}
+Accept: application/vnd.api+json
+User-Agent: FooBar/1.0
+
+###
+# Get a list of all scanned files (`scanalerts`) for a specific scan
+GET {{endpoint}}/v1/panopticon/admintools/scan/123
+Authorization: Bearer {{api_token}}
+Accept: application/vnd.api+json
+User-Agent: FooBar/1.0
+
+###
+# Get information about a specific scanned file (`scanalert`)
+GET {{endpoint}}/v1/panopticon/admintools/scanalert/12345
+Authorization: Bearer {{api_token}}
+Accept: application/vnd.api+json
+User-Agent: FooBar/1.0

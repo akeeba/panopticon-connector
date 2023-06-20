@@ -189,13 +189,60 @@ class Panopticon extends CMSPlugin implements SubscriberInterface
 			$defaults
 		);
 
+		// Admin Tools: Unblock an IP address
 		$routes[] = new Route(
-			['GET'],
-			self::API_PREFIX . 'akeebabackup/info',
-			'backup.version',
+			['POST'],
+			self::API_PREFIX . 'admintools/unblock',
+			'admintools.unblock',
 			[],
 			$defaults
 		);
+
+		// Admin Tools: Disable the plugin
+		$routes[] = new Route(
+			['POST'],
+			self::API_PREFIX . 'admintools/plugin/disable',
+			'admintools.plugin_disable',
+			[],
+			$defaults
+		);
+
+		// Admin Tools: Enable the plugin
+		$routes[] = new Route(
+			['POST'],
+			self::API_PREFIX . 'admintools/plugin/enable',
+			'admintools.plugin_enable',
+			[],
+			$defaults
+		);
+
+		// Admin Tools: Disable the .htaccess file
+		$routes[] = new Route(
+			['POST'],
+			self::API_PREFIX . 'admintools/htaccess/disable',
+			'admintools.htaccess_disable',
+			[],
+			$defaults
+		);
+
+		// Admin Tools: Enable the .htaccess file
+		$routes[] = new Route(
+			['POST'],
+			self::API_PREFIX . 'admintools/htaccess/enable',
+			'admintools.htaccess_enable',
+			[],
+			$defaults
+		);
+
+		// Admin Tools: Create a temporary Super User
+		$routes[] = new Route(
+			['POST'],
+			self::API_PREFIX . 'admintools/tempsuperuser',
+			'admintools.tempsuperuser',
+			[],
+			$defaults
+		);
+
 
 		$router->addRoutes($routes);
 	}
