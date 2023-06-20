@@ -243,6 +243,54 @@ class Panopticon extends CMSPlugin implements SubscriberInterface
 			$defaults
 		);
 
+		// Admin Tools: Start the PHP File Change Scanner
+		$routes[] = new Route(
+			['POST'],
+			self::API_PREFIX . 'admintools/scanner/start',
+			'admintools.scanner_start',
+			[],
+			$defaults
+		);
+
+		// Admin Tools: Step through the PHP File Change Scanner
+		$routes[] = new Route(
+			['POST'],
+			self::API_PREFIX . 'admintools/scanner/step',
+			'admintools.scanner_step',
+			[],
+			$defaults
+		);
+
+		// Admin Tools: Step through the PHP File Change Scanner
+		$routes[] = new Route(
+			['GET'],
+			self::API_PREFIX . 'admintools/scans',
+			'admintools.scans',
+			[],
+			$defaults
+		);
+
+		// Admin Tools: Step through the PHP File Change Scanner
+		$routes[] = new Route(
+			['GET'],
+			self::API_PREFIX . 'admintools/scan/:id',
+			'admintools.scan',
+			[
+				'id' => '(\d+)',
+			],
+			$defaults
+		);
+
+		// Admin Tools: Step through the PHP File Change Scanner
+		$routes[] = new Route(
+			['GET'],
+			self::API_PREFIX . 'admintools/scanalert/:id',
+			'admintools.scanalert',
+			[
+				'id' => '(\d+)',
+			],
+			$defaults
+		);
 
 		$router->addRoutes($routes);
 	}

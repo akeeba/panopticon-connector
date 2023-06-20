@@ -9,6 +9,8 @@ namespace Akeeba\Component\Panopticon\Api\Controller;
 
 defined('_JEXEC') || die;
 
+use Akeeba\Component\AdminTools\Administrator\Scanner\Util\Session;
+use DateInterval;
 use Joomla\CMS\Access\Access;
 use Joomla\CMS\Crypt\Crypt;
 use Joomla\CMS\Date\Date;
@@ -21,9 +23,13 @@ use Joomla\Database\DatabaseDriver;
 use RuntimeException;
 use Throwable;
 use Tobscure\JsonApi\Resource;
+use function ord;
+use function strlen;
 
 class AdmintoolsController extends ApiController
 {
+	private static $models = [];
+
 	protected $contentType = 'admintools';
 
 	protected $default_view = 'admintools';
@@ -64,6 +70,8 @@ class AdmintoolsController extends ApiController
 
 	public function plugin_disable()
 	{
+		$this->assertSuperUser();
+
 		$model = $this->getAdminToolsMVCFactory()->createModel('Controlpanel', 'Administrator');
 		$ret   = (object) [
 			'id'      => 0,
@@ -96,6 +104,8 @@ class AdmintoolsController extends ApiController
 
 	public function plugin_enable()
 	{
+		$this->assertSuperUser();
+
 		$model = $this->getAdminToolsMVCFactory()->createModel('Controlpanel', 'Administrator');
 		$ret   = (object) [
 			'id'      => 0,
@@ -121,6 +131,8 @@ class AdmintoolsController extends ApiController
 
 	public function htaccess_disable()
 	{
+		$this->assertSuperUser();
+
 		$ret = (object) [
 			'id'      => 0,
 			'exists'  => false,
@@ -156,6 +168,8 @@ class AdmintoolsController extends ApiController
 
 	public function htaccess_enable()
 	{
+		$this->assertSuperUser();
+
 		$ret = (object) [
 			'id'       => 0,
 			'exists'   => false,
@@ -191,23 +205,25 @@ class AdmintoolsController extends ApiController
 
 	public function tempsuperuser()
 	{
+		$this->assertSuperUser();
+
 		$expiration = $this->input->post->getString('expiration', '');
 		$now        = new Date();
 
 		try
 		{
-			$test = new Date($expiration);
-			$earliest = (new Date($expiration))->add(new \DateInterval('P1D'));
+			$test     = new Date($expiration);
+			$earliest = (new Date($expiration))->add(new DateInterval('P1D'));
 
 			if ($test <= $earliest)
 			{
-				$test = $now->add(new \DateInterval('P1W'));
+				$test = $now->add(new DateInterval('P1W'));
 			}
 		}
 		catch (Throwable $e)
 		{
 			$now  = new Date();
-			$test = $now->add(new \DateInterval('P1W'));
+			$test = $now->add(new DateInterval('P1W'));
 		}
 
 		$expiration = $test->toSql();
@@ -238,6 +254,131 @@ class AdmintoolsController extends ApiController
 		$data->id = $model->getState('tempsuperuser.id');
 
 		$this->respond($data);
+	}
+
+	public function scanner_start()
+	{
+		$this->assertCanManage();
+
+		$model = $this->getAdminToolsMVCFactory()->createModel('Scans', 'Administrator');
+
+		$result          = (object) $model->startScan('api');
+		$result->session = $this->getScannerState();
+		$result->id      = $result->id ?? $result->session['com_admintools.filescanner.scanID'] ?? 0;
+
+		$this->respond($result);
+	}
+
+	public function scanner_step()
+	{
+		// Make sure we can proceed
+		$this->assertCanManage();
+
+		// Get the session data of the PHP File Change Scanner
+		$sessionData = $this->input->post->get('session');
+
+		if (empty($sessionData))
+		{
+			throw new RuntimeException('You need to pass the session data');
+		}
+
+		$this->setScannerState($sessionData);
+
+		// Load the model and ste the scan
+		$model = $this->getAdminToolsMVCFactory()->createModel('Scans', 'Administrator');
+
+		$result = (object) $model->stepScan();
+
+		$result->session = $this->getScannerState();
+		$result->id      = $result->id ?? $result->session['com_admintools.filescanner.scanID'] ?? 0;
+
+		$this->respond($result);
+	}
+
+	public function scans()
+	{
+		$this->contentType = 'admintools.scans';
+		$this->input->set('model', 'Scans');
+
+		return $this->displayList();
+	}
+
+	public function scan()
+	{
+		$id = $this->input->getInt('id');
+
+		if (empty($id))
+		{
+			throw new RuntimeException('You must specify the scan ID.');
+		}
+
+		$this->contentType = 'admintools.scanalerts';
+		$this->input->set('model', 'Scanalerts');
+
+		$this->modelState->set('filter.scan_id', $id);
+
+		return $this->displayList();
+	}
+
+	public function scanalert()
+	{
+		$id = $this->input->getInt('id');
+
+		if (empty($id))
+		{
+			throw new RuntimeException('You must specify the scanalert ID.');
+		}
+
+		$this->contentType = 'admintools.scanalert';
+		$this->input->set('model', 'Scanalert');
+
+		return $this->displayItem($id);
+	}
+
+	public function getModel($name = '', $prefix = '', $config = [])
+	{
+		switch (strtolower($name))
+		{
+			case 'scans':
+			case 'scan':
+			case 'scanalerts':
+			case 'scanalert':
+				self::$models[strtolower($name)] =
+					self::$models[strtolower($name)]
+					?? $this->getAdminToolsMVCFactory()->createModel($name, 'Administrator');
+
+				return self::$models[strtolower($name)];
+				break;
+
+			default:
+				return parent::getModel($name, $prefix, $config);
+		}
+	}
+
+
+	private function getScannerState(): array
+	{
+		$scannerSession = Session::getInstance();
+		$session        = Factory::getApplication()->getSession();
+		$ret            = [];
+
+		foreach ($scannerSession->getKnownKeys() as $key)
+		{
+			$key       = 'com_admintools.filescanner.' . $key;
+			$ret[$key] = $session->get($key, null);
+		}
+
+		return $ret;
+	}
+
+	private function setScannerState(array $sessionData): void
+	{
+		$session = Factory::getApplication()->getSession();
+
+		foreach ($sessionData as $k => $v)
+		{
+			$session->set($k, $v);
+		}
 	}
 
 	private function respond(object $result)
@@ -276,7 +417,7 @@ class AdmintoolsController extends ApiController
 		$length = 8, $salt = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
 	)
 	{
-		$base     = \strlen($salt);
+		$base     = strlen($salt);
 		$makepass = '';
 
 		/*
@@ -287,12 +428,12 @@ class AdmintoolsController extends ApiController
 		 * predictable.
 		 */
 		$random = Crypt::genRandomBytes($length + 1);
-		$shift  = \ord($random[0]);
+		$shift  = ord($random[0]);
 
 		for ($i = 1; $i <= $length; ++$i)
 		{
-			$makepass .= $salt[($shift + \ord($random[$i])) % $base];
-			$shift    += \ord($random[$i]);
+			$makepass .= $salt[($shift + ord($random[$i])) % $base];
+			$shift    += ord($random[$i]);
 		}
 
 		return $makepass;
@@ -329,4 +470,23 @@ class AdmintoolsController extends ApiController
 		return $this->superUserGroups;
 	}
 
+	private function assertSuperUser(): void
+	{
+		$user = $this->app->getIdentity();
+
+		if (empty($user) || !($user->authorise('core.admin')))
+		{
+			throw new RuntimeException('JERROR_ALERTNOAUTHOR');
+		}
+	}
+
+	private function assertCanManage(): void
+	{
+		$user = $this->app->getIdentity();
+
+		if (empty($user) || !($user->authorise('core.manage', 'com_admintools')))
+		{
+			throw new RuntimeException('JERROR_ALERTNOAUTHOR');
+		}
+	}
 }

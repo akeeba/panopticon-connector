@@ -53,14 +53,14 @@ expiration=2023-12-31 20:10:00
 
 ###
 # Start the PHP File Change Scanner
-POST {{endpoint}}/v1/panopticon/admintools/startscanner
+POST {{endpoint}}/v1/panopticon/admintools/scanner/start
 Authorization: Bearer {{api_token}}
 Accept: application/vnd.api+json
 User-Agent: FooBar/1.0
 
 ###
 # Step throught the PHP File Change Scanner
-POST {{endpoint}}/v1/panopticon/admintools/stepscanner
+POST {{endpoint}}/v1/panopticon/admintools/scanner/step
 Authorization: Bearer {{api_token}}
 Accept: application/vnd.api+json
 User-Agent: FooBar/1.0
@@ -74,14 +74,14 @@ User-Agent: FooBar/1.0
 
 ###
 # Get a list of all scanned files (`scanalerts`) for a specific scan
-GET {{endpoint}}/v1/panopticon/admintools/scan/123
+GET {{endpoint}}/v1/panopticon/admintools/scan/27
 Authorization: Bearer {{api_token}}
 Accept: application/vnd.api+json
 User-Agent: FooBar/1.0
 
 ###
 # Get information about a specific scanned file (`scanalert`)
-GET {{endpoint}}/v1/panopticon/admintools/scanalert/12345
+GET {{endpoint}}/v1/panopticon/admintools/scanalert/29621
 Authorization: Bearer {{api_token}}
 Accept: application/vnd.api+json
 User-Agent: FooBar/1.0
