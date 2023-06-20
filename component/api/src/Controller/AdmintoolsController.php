@@ -275,7 +275,7 @@ class AdmintoolsController extends ApiController
 		$this->assertCanManage();
 
 		// Get the session data of the PHP File Change Scanner
-		$sessionData = $this->input->post->get('session');
+		$sessionData = $this->input->post->getRaw('session');
 
 		if (empty($sessionData))
 		{
