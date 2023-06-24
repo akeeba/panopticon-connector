@@ -5,6 +5,8 @@
  * @license   https://www.gnu.org/licenses/agpl-3.0.txt GNU Affero General Public License, version 3 or later
  */
 
+defined('_JEXEC') || die;
+
 const AKEEBA_PANOPTICON_VERSION = '##VERSION##';
 const AKEEBA_PANOPTICON_DATE    = '##DATE##';
 const AKEEBA_PANOPTICON_MINPHP  = '8.1.0';

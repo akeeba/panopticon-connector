@@ -78,6 +78,8 @@ class plgSystemPanopticon extends CMSPlugin
 		// At this point, we have an API path we are supposed to handle. First, register the PSR-4 autoloader.
 		JLoader::registerNamespace('Akeeba\\PanopticonConnector', __DIR__ . '/src', false, false, 'psr4');
 
+		require_once __DIR__ . '/version.php';
+
 		try
 		{
 			$input = $this->app->input;
@@ -189,11 +191,7 @@ class plgSystemPanopticon extends CMSPlugin
 		$router->addRoute(new Route(
 			'GET',
 			self::API_PREFIX . 'core/update',
-			function (Input $input) {
-				return (object) [
-					'foo' => 'bar'
-				];
-			}
+			new \Akeeba\PanopticonConnector\Controller\CoreUpdate()
 		));
 
 		// TODO Add routes

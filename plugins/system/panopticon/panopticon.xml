@@ -19,6 +19,7 @@
     <files>
         <folder>src</folder>
         <file plugin="panopticon">panopticon.php</file>
+        <file>version.php</file>
     </files>
 
     <languages folder="language">

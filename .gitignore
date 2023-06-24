@@ -1,6 +1,7 @@
 ### Component non-repo files
 /component/backend/panopticon.xml
 /component/backend/version.php
+/plugins/system/panopticon/version.php
 /pkg_panopticon.xml
 
 ### Composer
