@@ -43,8 +43,7 @@
 
     <fileset dir="${dirs.release}" id="package">
         <include name="com_*.zip"/>
-        <include name="mod_*.zip" />
-        <include name="plg_*.zip"/>
+        <include name="plg_webservices*.zip"/>
         <include name="pkg_*.xml"/>
         <include name="language/**"/>
         <include name="*.txt"/>
