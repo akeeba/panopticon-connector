@@ -17,7 +17,10 @@
     <description>PLG_SYSTEM_PANOPTICON_XML_DESCRIPTION</description>
 
     <files>
+        <folder>fields</folder>
         <folder>src</folder>
+        <folder>tmpl</folder>
+
         <file plugin="panopticon">panopticon.php</file>
         <file>version.php</file>
     </files>
@@ -26,4 +29,17 @@
         <language tag="en-GB">en-GB/en-GB.plg_system_panopticon.ini</language>
         <language tag="en-GB">en-GB/en-GB.plg_system_panopticon.sys.ini</language>
     </languages>
+
+    <config>
+        <fields name="params" addfieldpath="/plugins/system/panopticon/fields">
+            <fieldset name="basic">
+                <field name="dummy1"
+                       label=""
+                       type="panopticoninfo"
+                       default=""
+                       readonly="true"
+                />
+            </fieldset>
+        </fields>
+    </config>
 </extension>
