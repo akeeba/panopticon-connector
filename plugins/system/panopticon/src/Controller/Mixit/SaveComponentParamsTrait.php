@@ -9,18 +9,14 @@ namespace Akeeba\PanopticonConnector\Controller\Mixit;
 
 defined('_JEXEC') || die;
 
-use Joomla\CMS\Cache\Cache;
-use Joomla\CMS\Component\ComponentHelper;
-use Joomla\CMS\Factory;
-use Joomla\Registry\Registry;
 use ReflectionClass;
 use Throwable;
 
 trait SaveComponentParamsTrait
 {
-	private function saveComponentParameters(string $component, Registry $params): void
+	private function saveComponentParameters(string $component, \JRegistry $params): void
 	{
-		$db    = Factory::getDbo();
+		$db    = \JFactory::getDbo();
 		$query = $db->getQuery(true)
 			->update($db->quoteName('#__extensions'))
 			->set($db->quoteName('params') . ' = ' . $db->quote($params->toString('JSON')))
@@ -38,7 +34,7 @@ trait SaveComponentParamsTrait
 		$this->clearCacheGroupJoomla3('_system', 1);
 
 		// Update internal Joomla data
-		$refClass = new ReflectionClass(ComponentHelper::class);
+		$refClass = new ReflectionClass(\JComponentHelper::class);
 		$refProp  = $refClass->getProperty('components');
 		$refProp->setAccessible(true);
 
@@ -50,7 +46,7 @@ trait SaveComponentParamsTrait
 
 	private function clearCacheGroupJoomla3(string $group, int $client_id, object $app = null): array
 	{
-		$app = $app ?? Factory::getApplication();
+		$app = $app ?? \JFactory::getApplication();
 
 		$options = [
 			'defaultgroup' => $group,
@@ -60,7 +56,7 @@ trait SaveComponentParamsTrait
 
 		try
 		{
-			$cache = Cache::getInstance('callback', $options);
+			$cache = \JCache::getInstance('callback', $options);
 			/** @noinspection PhpUndefinedMethodInspection Available via __call(), not tagged in Joomla core */
 			$cache->clean();
 		}

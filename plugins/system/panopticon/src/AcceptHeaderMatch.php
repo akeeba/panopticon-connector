@@ -7,7 +7,6 @@
 
 namespace Akeeba\PanopticonConnector;
 
-
 defined('_JEXEC') || die;
 
 class AcceptHeaderMatch

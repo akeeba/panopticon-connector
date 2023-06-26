@@ -7,15 +7,13 @@
 
 namespace Akeeba\PanopticonConnector\Controller;
 
+defined('_JEXEC') || die;
 
 use Akeeba\PanopticonConnector\Model\ExtensionsModel;
-use Joomla\CMS\Input\Input;
-
-defined('_JEXEC') || die;
 
 class Extensions extends AbstractController
 {
-	public function __invoke(Input $input): object
+	public function __invoke(\JInput $input): object
 	{
 		$updatable  = $input->getInt('updatable', 0);
 		$protected  = $input->getInt('protected', 0);

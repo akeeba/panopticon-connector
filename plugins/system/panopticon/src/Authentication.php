@@ -9,15 +9,13 @@ namespace Akeeba\PanopticonConnector;
 
 defined('_JEXEC') || die;
 
-use Joomla\CMS\Factory;
-
 class Authentication
 {
 	public function getSecret(): string
 	{
 		static $secret = null;
 
-		$app = Factory::getApplication();
+		$app = \JFactory::getApplication();
 
 		$secret = $secret ?: strtolower(hash_hmac('sha256', implode(':', [
 			JPATH_SITE,
@@ -33,7 +31,7 @@ class Authentication
 
 	public function isAuthenticated(): bool
 	{
-		$input = Factory::getApplication()->input;
+		$input = \JFactory::getApplication()->input;
 
 		/**
 		 * First look for an HTTP Authorization header with the following format:

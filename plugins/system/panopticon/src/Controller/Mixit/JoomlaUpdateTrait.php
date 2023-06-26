@@ -7,19 +7,11 @@
 
 namespace Akeeba\PanopticonConnector\Controller\Mixit;
 
+defined('_JEXEC') || die;
 
 use Akeeba\PanopticonConnector\Version\Version as VersionParser;
 use Exception;
-use Joomla\CMS\Component\ComponentHelper;
-use Joomla\CMS\Factory;
-use Joomla\CMS\Table\Table;
-use Joomla\CMS\Updater\Updater;
-use Joomla\CMS\Version;
-use Joomla\Registry\Registry;
-use Joomla\Utilities\ArrayHelper;
 use Throwable;
-
-defined('_JEXEC') || die;
 
 trait JoomlaUpdateTrait
 {
@@ -30,16 +22,16 @@ trait JoomlaUpdateTrait
 	public function getJoomlaUpdateInfo(bool $force = false): object
 	{
 		// Get the update parameters from the com_installer configuration
-		$params           = ComponentHelper::getComponent('com_installer')->getParams();
+		$params           = \JComponentHelper::getComponent('com_installer')->getParams();
 		$cacheHours       = (int) $params->get('cachetimeout', 6);
 		$cacheTimeout     = 3600 * $cacheHours;
-		$minimumStability = (int) $params->get('minimum_stability', Updater::STABILITY_STABLE);
+		$minimumStability = (int) $params->get('minimum_stability', \JUpdater::STABILITY_STABLE);
 
 		$version  = defined('AKEEBA_PANOPTICON_VERSION') ? AKEEBA_PANOPTICON_VERSION : '0.0.0-dev1';
 		$date     = defined('AKEEBA_PANOPTICON_DATE') ? AKEEBA_PANOPTICON_DATE : gmdate('Y-m-d');
 		$apiLevel = defined('AKEEBA_PANOPTICON_API') ? AKEEBA_PANOPTICON_API : 100;
 
-		$jVersion   = new Version();
+		$jVersion   = new \JVersion();
 		$updateInfo = (object) [
 			'current'             => $jVersion->getShortVersion(),
 			'currentStability'    => $this->detectStability($jVersion->getShortVersion()),
@@ -89,7 +81,7 @@ trait JoomlaUpdateTrait
 
 		// Update updateSiteUrl and lastUpdateTimestamp from the first update site for the core pseudo-extension
 		/** @var \JTableUpdatesite $updateSiteTable */
-		$updateSiteTable = Table::getInstance('Updatesite');
+		$updateSiteTable = \JTable::getInstance('Updatesite');
 
 		if ($updateSiteTable->load(
 			array_reduce(
@@ -113,9 +105,9 @@ trait JoomlaUpdateTrait
 		}
 
 		// This populates the #__updates table records, if necessary
-		Updater::getInstance()->findUpdates($eid, $cacheTimeout, $minimumStability, true);
+		\JUpdater::getInstance()->findUpdates($eid, $cacheTimeout, $minimumStability, true);
 
-		$db    = Factory::getDbo();
+		$db    = \JFactory::getDbo();
 		$query = $db->getQuery(true)
 			->select(
 				$db->quoteName(
@@ -226,7 +218,7 @@ trait JoomlaUpdateTrait
 			],
 		];
 
-		if (!ComponentHelper::isEnabled('com_admintools'))
+		if (!\JComponentHelper::isEnabled('com_admintools'))
 		{
 			return $ret;
 		}
@@ -236,16 +228,16 @@ trait JoomlaUpdateTrait
 		$registry                    = $this->getAdminToolsConfigRegistry();
 		$ret->secret_word            = $registry->get('adminpw') ?: null;
 		$ret->admindir               = $registry->get('adminlogindir', 'administrator') ?: 'administrator';
-		$ret->awayschedule->timezone = Factory::getApplication()->get('offset', 'UTC');
+		$ret->awayschedule->timezone = \JFactory::getApplication()->get('offset', 'UTC');
 		$ret->awayschedule->from     = $registry->get('awayschedule_from') ?: null;
 		$ret->awayschedule->to       = $registry->get('awayschedule_from') ?: null;
 
 		return $ret;
 	}
 
-	private function getAdminToolsConfigRegistry(): ?Registry
+	private function getAdminToolsConfigRegistry(): ?\JRegistry
 	{
-		$db    = Factory::getDbo();
+		$db    = \JFactory::getDbo();
 		$query = $db->getQuery(true)
 			->select($db->quoteName('value'))
 			->from($db->quoteName('#__admintools_storage'))
@@ -256,21 +248,21 @@ trait JoomlaUpdateTrait
 		}
 		catch (Exception $e)
 		{
-			return new Registry();
+			return new \JRegistry();
 		}
 
 		if (empty($json))
 		{
-			return new Registry();
+			return new \JRegistry();
 		}
 
 		try
 		{
-			return new Registry($json);
+			return new \JRegistry($json);
 		}
 		catch (Exception $e)
 		{
-			return new Registry();
+			return new \JRegistry();
 		}
 	}
 
@@ -298,7 +290,7 @@ trait JoomlaUpdateTrait
 			return $this->coreUpdateSiteIDs;
 		}
 
-		$db    = Factory::getDbo();
+		$db    = \JFactory::getDbo();
 		$query = $db->getQuery(true)
 			->select($db->quoteName('update_site_id'))
 			->from($db->quoteName('#__update_sites_extensions'))
@@ -318,7 +310,8 @@ trait JoomlaUpdateTrait
 			return $this->coreUpdateSiteIDs;
 		}
 
-		$coreUpdateSiteIDs = ArrayHelper::toInteger($this->coreUpdateSiteIDs);
+		$coreUpdateSiteIDs = $this->coreUpdateSiteIDs;
+		\JArrayHelper::toInteger($coreUpdateSiteIDs);
 		$coreUpdateSiteIDs = array_map([$db, 'quote'], $coreUpdateSiteIDs);
 		$coreUpdateSiteIDs = implode(',', $coreUpdateSiteIDs);
 
@@ -360,7 +353,7 @@ trait JoomlaUpdateTrait
 		}
 
 		// Get a database object
-		$db = Factory::getDbo();
+		$db = \JFactory::getDbo();
 
 		// Clear update records
 		$query = $db->getQuery(true)
@@ -376,7 +369,8 @@ trait JoomlaUpdateTrait
 			// Swallow the exception.
 		}
 
-		$coreUpdateSiteIDs = ArrayHelper::toInteger($updateSiteIDs);
+		$coreUpdateSiteIDs = $updateSiteIDs;
+		\JArrayHelper::toInteger($coreUpdateSiteIDs);
 		$coreUpdateSiteIDs = array_map([$db, 'quote'], $coreUpdateSiteIDs);
 		$coreUpdateSiteIDs = implode(',', $coreUpdateSiteIDs);
 

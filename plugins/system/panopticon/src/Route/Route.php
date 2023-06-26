@@ -7,7 +7,6 @@
 
 namespace Akeeba\PanopticonConnector\Route;
 
-
 defined('_JEXEC') || die;
 
 class Route

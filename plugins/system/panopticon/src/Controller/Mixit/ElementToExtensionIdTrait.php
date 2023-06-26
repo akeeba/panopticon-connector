@@ -9,8 +9,6 @@ namespace Akeeba\PanopticonConnector\Controller\Mixit;
 
 defined('_JEXEC') || die;
 
-use Joomla\CMS\Factory;
-
 trait ElementToExtensionIdTrait
 {
 	public function getExtensionIdFromElement(string $extensionName): ?int
@@ -22,7 +20,7 @@ trait ElementToExtensionIdTrait
 			return null;
 		}
 
-		$db    = Factory::getDbo();
+		$db    = \JFactory::getDbo();
 		$query = $db->getQuery(true)
 			->select($db->quoteName('extension_id'))
 			->from($db->quoteName('#__extensions'));

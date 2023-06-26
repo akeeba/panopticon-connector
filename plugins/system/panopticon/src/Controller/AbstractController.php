@@ -9,21 +9,17 @@ namespace Akeeba\PanopticonConnector\Controller;
 
 defined('_JEXEC') || die;
 
-use Joomla\CMS\Input\Input;
-use Joomla\CMS\Pagination\Pagination;
-use Joomla\CMS\Uri\Uri;
-
 abstract class AbstractController
 {
 	/**
 	 * Executes this controller
 	 *
-	 * @param   Input  $input
+	 * @param   \JInput  $input
 	 *
 	 * @return  object
 	 * @since   1.0.0
 	 */
-	abstract public function __invoke(Input $input): object;
+	abstract public function __invoke(\JInput $input): object;
 
 	/**
 	 * Express a single item as an API return object
@@ -40,7 +36,7 @@ abstract class AbstractController
 
 		return (object) [
 			'links' => [
-				'self' => Uri::getInstance()->toString(),
+				'self' => \JUri::getInstance()->toString(),
 			],
 			'data'  => [
 				'type'       => $type,
@@ -55,16 +51,16 @@ abstract class AbstractController
 	 *
 	 * @param   string      $type        Data type of the single item, e.g. 'thingie'
 	 * @param   array       $items       Array of items. Each item should be an JSON-serializable object or string
-	 * @param   Pagination  $pagination  Pagination object for the collection of items
+	 * @param   \JPagination  $pagination  Pagination object for the collection of items
 	 *
 	 * @return  object
 	 * @since   1.0.0
 	 */
-	protected function asItemsList(string $type, array $items, Pagination $pagination)
+	protected function asItemsList(string $type, array $items, \JPagination $pagination)
 	{
 		$out = (object) [
 			'links' => (object) [
-				'self' => Uri::getInstance()->toString(),
+				'self' => \JUri::getInstance()->toString(),
 			],
 			'data'  => [],
 			'meta'  => (object) [
@@ -85,7 +81,7 @@ abstract class AbstractController
 
 		if ($pagination->pagesTotal > 1)
 		{
-			$uri = clone Uri::getInstance();
+			$uri = clone \JUri::getInstance();
 			$uri->setVar('pages[offset]', 0);
 
 			$out->links->first = $uri->toString();
@@ -93,7 +89,7 @@ abstract class AbstractController
 
 		if ($pagination->pagesCurrent > 1)
 		{
-			$uri = clone Uri::getInstance();
+			$uri = clone \JUri::getInstance();
 			$uri->setVar('pages[offset]', max(0, $pagination->limitstart - $pagination->limit));
 
 			$out->links->previous = $uri->toString();
@@ -101,7 +97,7 @@ abstract class AbstractController
 
 		if ($pagination->pagesCurrent > 1 && $pagination->pagesCurrent < $pagination->pagesTotal)
 		{
-			$uri = clone Uri::getInstance();
+			$uri = clone \JUri::getInstance();
 			$uri->setVar('pages[offset]', min(($pagination->pagesTotal - 1) * $pagination->limitstart, $pagination->limitstart + $pagination->limit));
 
 			$out->links->next = $uri->toString();
@@ -109,7 +105,7 @@ abstract class AbstractController
 
 		if ($pagination->pagesTotal > 1)
 		{
-			$uri = clone Uri::getInstance();
+			$uri = clone \JUri::getInstance();
 			$uri->setVar('pages[offset]', ($pagination->pagesTotal - 1) * $pagination->limitstart);
 
 			$out->links->last = $uri->toString();

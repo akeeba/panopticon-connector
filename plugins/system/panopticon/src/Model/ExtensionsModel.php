@@ -11,19 +11,13 @@ defined('_JEXEC') || die;
 
 use Akeeba\PanopticonConnector\Controller\Mixit\ElementToExtensionIdTrait;
 use Exception;
-use JModelList;
-use Joomla\CMS\Component\ComponentHelper;
-use Joomla\CMS\Factory;
-use Joomla\CMS\Language\Text;
-use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
-use Joomla\CMS\Updater\Updater;
 use stdClass;
 
-class ExtensionsModel extends JModelList
+class ExtensionsModel extends \JModelList
 {
 	use ElementToExtensionIdTrait;
 
-	public function __construct($config = [], MVCFactoryInterface $factory = null)
+	public function __construct($config = [])
 	{
 		$config['filter_fields'] = $config['filter_fields'] ?? [
 			'updatable',
@@ -32,7 +26,7 @@ class ExtensionsModel extends JModelList
 			'core',
 		];
 
-		parent::__construct($config, $factory);
+		parent::__construct($config);
 	}
 
 	protected function getListQuery()
@@ -102,11 +96,11 @@ class ExtensionsModel extends JModelList
 			$model = \JModelLegacy::getInstance('Update', 'InstallerModel', ['ignore_request' => true]);
 
 			// Get the updates caching duration.
-			$params       = ComponentHelper::getComponent('com_installer')->getParams();
+			$params       = \JComponentHelper::getComponent('com_installer')->getParams();
 			$cacheTimeout = 3600 * ((int) $params->get('cachetimeout', 6));
 
 			// Get the minimum stability.
-			$minimumStability = (int) $params->get('minimum_stability', Updater::STABILITY_STABLE);
+			$minimumStability = (int) $params->get('minimum_stability', \JUpdater::STABILITY_STABLE);
 
 			// Purge the table before checking again.
 			$model->purge();
@@ -155,18 +149,18 @@ class ExtensionsModel extends JModelList
 		}
 
 		// Translate some information
-		$jLang = Factory::getApplication()->getLanguage();
+		$jLang = \JFactory::getApplication()->getLanguage();
 		// -- Load the com_installer language files; they are used below
 		$jLang->load('com_installer', JPATH_ADMINISTRATOR, null);
 
 		$items = array_map(
 			function (object $item) use ($jLang): object {
 				// Translate the client, extension type, and folder
-				$item->client_translated = Text::_([
+				$item->client_translated = \JText::_([
 					0 => 'JSITE', 1 => 'JADMINISTRATOR', 3 => 'JAPI',
 				][$item->client_id] ?? 'JSITE');
-				$item->type_translated   = Text::_('COM_INSTALLER_TYPE_' . strtoupper($item->type));
-				$item->folder_translated = @$item->folder ? $item->folder : Text::_('COM_INSTALLER_TYPE_NONAPPLICABLE');
+				$item->type_translated   = \JText::_('COM_INSTALLER_TYPE_' . strtoupper($item->type));
+				$item->folder_translated = @$item->folder ? $item->folder : \JText::_('COM_INSTALLER_TYPE_NONAPPLICABLE');
 
 				// Load an extension's language files (if applicable)
 				$path = $item->client_id ? JPATH_ADMINISTRATOR : JPATH_SITE;
@@ -222,10 +216,10 @@ class ExtensionsModel extends JModelList
 				}
 
 				// Translate the extension name, if applicable
-				$item->name = Text::_($item->name);
+				$item->name = \JText::_($item->name);
 
 				// Translate the description, if applicable
-				$item->description = empty($item->description) ? '' : Text::_($item->description);
+				$item->description = empty($item->description) ? '' : \JText::_($item->description);
 
 				return $item;
 			},

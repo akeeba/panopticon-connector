@@ -12,10 +12,6 @@ defined('_JEXEC') || die;
 use Akeeba\PanopticonConnector\Controller\Mixit\ElementToExtensionIdTrait;
 use Akeeba\PanopticonConnector\Controller\Mixit\JoomlaUpdateTrait;
 use Akeeba\PanopticonConnector\Controller\Mixit\SaveComponentParamsTrait;
-use Joomla\CMS\Component\ComponentHelper;
-use Joomla\CMS\Factory;
-use Joomla\CMS\Input\Input;
-
 
 class CoreUpdatePost extends AbstractController
 {
@@ -23,7 +19,7 @@ class CoreUpdatePost extends AbstractController
 	use JoomlaUpdateTrait;
 	use SaveComponentParamsTrait;
 
-	public function __invoke(Input $input): object
+	public function __invoke(\JInput $input): object
 	{
 		// Change the update site if necessary
 		$updateSource = $input->post->getCmd('updatesource', '');
@@ -65,7 +61,7 @@ class CoreUpdatePost extends AbstractController
 		}
 
 		// Get the current parameters
-		$params = ComponentHelper::getParams('com_joomlaupdate');
+		$params = \JComponentHelper::getParams('com_joomlaupdate');
 
 		$currentUpdateSource = $params->get('updatesource');
 		$currentUrl          = $params->get('customurl');
@@ -100,7 +96,7 @@ class CoreUpdatePost extends AbstractController
 			return;
 		}
 
-		$db = Factory::getDbo();
+		$db = \JFactory::getDbo();
 
 		// Is there an update site record?
 		$query = $db

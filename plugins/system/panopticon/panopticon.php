@@ -11,11 +11,8 @@ use Akeeba\PanopticonConnector\AcceptHeaderMatch;
 use Akeeba\PanopticonConnector\Authentication;
 use Akeeba\PanopticonConnector\Route\Route;
 use Akeeba\PanopticonConnector\Route\Router;
-use Joomla\CMS\Input\Input;
-use Joomla\CMS\Plugin\CMSPlugin;
-use Joomla\CMS\Uri\Uri;
 
-class plgSystemPanopticon extends CMSPlugin
+class plgSystemPanopticon extends \JPlugin
 {
 	/**
 	 * Joomla database object
@@ -45,8 +42,8 @@ class plgSystemPanopticon extends CMSPlugin
 		}
 
 		// Get the relative path
-		$basePath    = trim(Uri::base(true), '/');
-		$currentPath = trim(Uri::getInstance()->getPath(), '/');
+		$basePath    = trim(\JUri::base(true), '/');
+		$currentPath = trim(\JUri::getInstance()->getPath(), '/');
 
 		if (strlen($basePath) > 0 && substr($currentPath, 0, strlen($basePath)) === $basePath)
 		{
@@ -184,7 +181,7 @@ class plgSystemPanopticon extends CMSPlugin
 		$this->app->close();
 	}
 
-	private function getRouter(Input $input): Router
+	private function getRouter(\JInput $input): Router
 	{
 		$router = new Router($input);
 

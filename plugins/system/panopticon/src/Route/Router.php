@@ -7,10 +7,6 @@
 
 namespace Akeeba\PanopticonConnector\Route;
 
-
-use Joomla\CMS\Factory;
-use Joomla\CMS\Input\Input;
-
 defined('_JEXEC') || die;
 
 class Router
@@ -26,7 +22,7 @@ class Router
 	/**
 	 * The input object where variables will be set
 	 *
-	 * @var   Input
+	 * @var   \JInput
 	 * @since 1.0.0
 	 */
 	protected $input;
@@ -34,12 +30,12 @@ class Router
 	/**
 	 * Constructor
 	 *
-	 * @param   Input  $input  The input object where variables will be set
+	 * @param   \JInput  $input  The input object where variables will be set
 	 *
 	 * @return  void
 	 * @since   1.0.0
 	 */
-	public function __construct(Input $input)
+	public function __construct(\JInput $input)
 	{
 		$this->input = $input;
 	}

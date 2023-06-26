@@ -11,14 +11,13 @@ defined('_JEXEC') || die;
 
 use Akeeba\PanopticonConnector\Controller\Mixit\ElementToExtensionIdTrait;
 use Akeeba\PanopticonConnector\Controller\Mixit\JoomlaUpdateTrait;
-use Joomla\CMS\Input\Input;
 
 class CoreUpdate extends AbstractController
 {
 	use ElementToExtensionIdTrait;
 	use JoomlaUpdateTrait;
 
-	public function __invoke(Input $input): object
+	public function __invoke(\JInput $input): object
 	{
 		$force = $input->getInt('force', 0) === 1;
 
