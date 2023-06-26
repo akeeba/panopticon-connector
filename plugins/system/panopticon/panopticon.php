@@ -194,7 +194,116 @@ class plgSystemPanopticon extends CMSPlugin
 			new \Akeeba\PanopticonConnector\Controller\CoreUpdate()
 		));
 
-		// TODO Add routes
+		$router->addRoute(new Route(
+			'POST',
+			self::API_PREFIX . 'core/update',
+			new \Akeeba\PanopticonConnector\Controller\CoreUpdatePost()
+		));
+
+		// TODO GET extensions
+//		$router->addRoute(new Route(
+//			'GET',
+//			self::API_PREFIX . 'extensions',
+//			new \Akeeba\PanopticonConnector\Controller\Extensions()
+//		));
+
+		// TODO POST updates
+//		$router->addRoute(new Route(
+//			'POST',
+//			self::API_PREFIX . 'updates',
+//			new \Akeeba\PanopticonConnector\Controller\ExtensionsUpdatesRefresh()
+//		));
+
+		// TODO POST update
+//		$router->addRoute(new Route(
+//			'POST',
+//			self::API_PREFIX . 'update',
+//			new \Akeeba\PanopticonConnector\Controller\ExtensionsUpdateApply()
+//		));
+
+		// TODO POST core/update/download
+//		$router->addRoute(new Route(
+//			'POST',
+//			self::API_PREFIX . 'core/update/download',
+//			new \Akeeba\PanopticonConnector\Controller\CoreUpdateDownload()
+//		));
+
+		// TODO POST core/update/activate
+//		$router->addRoute(new Route(
+//			'POST',
+//			self::API_PREFIX . 'core/update/activate',
+//			new \Akeeba\PanopticonConnector\Controller\CoreUpdateActivate()
+//		));
+
+		// TODO POST core/update/postupdate
+//		$router->addRoute(new Route(
+//			'POST',
+//			self::API_PREFIX . 'core/update/postupdate',
+//			new \Akeeba\PanopticonConnector\Controller\CoreUpdatePostupdate()
+//		));
+
+		// TODO POST admintools/unblock
+//		$router->addRoute(new Route(
+//			'POST',
+//			self::API_PREFIX . 'admintools/unblock',
+//			new \Akeeba\PanopticonConnector\Controller\AdmintoolsUnblock()
+//		));
+
+		// TODO POST admintools/plugin/disable
+//		$router->addRoute(new Route(
+//			'POST',
+//			self::API_PREFIX . 'admintools/plugin/disable',
+//			new \Akeeba\PanopticonConnector\Controller\AdmintoolsPluginDisable()
+//		));
+
+		// TODO POST admintools/plugin/enable
+//		$router->addRoute(new Route(
+//			'POST',
+//			self::API_PREFIX . 'admintools/plugin/enable',
+//			new \Akeeba\PanopticonConnector\Controller\AdmintoolsPluginEnable()
+//		));
+
+		// TODO POST admintools/htaccess/disable
+//		$router->addRoute(new Route(
+//			'POST',
+//			self::API_PREFIX . 'admintools/htaccess/disable',
+//			new \Akeeba\PanopticonConnector\Controller\AdmintoolsHtaccessDisable()
+//		));
+
+		// TODO POST admintools/htaccess/enable
+//		$router->addRoute(new Route(
+//			'POST',
+//			self::API_PREFIX . 'admintools/htaccess/enable',
+//			new \Akeeba\PanopticonConnector\Controller\AdmintoolsHtaccessEnable()
+//		));
+
+		// TODO POST admintools/htaccess/tempsuperuser
+//		$router->addRoute(new Route(
+//			'POST',
+//			self::API_PREFIX . 'admintools/tempsuperuser',
+//			new \Akeeba\PanopticonConnector\Controller\AdmintoolsTempsuperuser()
+//		));
+
+		// TODO POST admintools/scanner/start
+//		$router->addRoute(new Route(
+//			'POST',
+//			self::API_PREFIX . 'admintools/scanner/start',
+//			new \Akeeba\PanopticonConnector\Controller\AdmintoolsScannerStart()
+//		));
+
+		// TODO POST admintools/scanner/step
+//		$router->addRoute(new Route(
+//			'POST',
+//			self::API_PREFIX . 'admintools/scanner/step',
+//			new \Akeeba\PanopticonConnector\Controller\AdmintoolsScannerStep()
+//		));
+
+		// TODO POST admintools/scans
+//		$router->addRoute(new Route(
+//			'GET',
+//			self::API_PREFIX . 'admintools/scans',
+//			new \Akeeba\PanopticonConnector\Controller\AdmintoolsScans()
+//		));
 
 		return $router;
 	}
