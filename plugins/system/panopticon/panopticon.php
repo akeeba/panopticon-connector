@@ -200,6 +200,13 @@ class plgSystemPanopticon extends CMSPlugin
 			new \Akeeba\PanopticonConnector\Controller\CoreUpdatePost()
 		));
 
+		// The former is required for the connection test.
+		$router->addRoute(new Route(
+			'GET',
+			'v1/extensions',
+			new \Akeeba\PanopticonConnector\Controller\Extensions()
+		));
+
 		$router->addRoute(new Route(
 			'GET',
 			self::API_PREFIX . 'extensions',

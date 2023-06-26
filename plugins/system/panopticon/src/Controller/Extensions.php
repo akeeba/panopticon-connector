@@ -17,9 +17,9 @@ class Extensions extends AbstractController
 {
 	public function __invoke(Input $input): object
 	{
-		$updatable  = $input->getBool('updatable', null);
-		$protected  = $input->getBool('protected', null);
-		$core       = $input->getBool('core', null);
+		$updatable  = $input->getInt('updatable', 0);
+		$protected  = $input->getInt('protected', 0);
+		$core       = $input->getInt('core', 0);
 		$force      = $input->getBool('force', false);
 		$pageParams = $input->getInt('page', []);
 		$pageParams = is_array($pageParams) ? $pageParams : [];
