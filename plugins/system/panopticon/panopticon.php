@@ -200,12 +200,11 @@ class plgSystemPanopticon extends CMSPlugin
 			new \Akeeba\PanopticonConnector\Controller\CoreUpdatePost()
 		));
 
-		// TODO GET extensions
-//		$router->addRoute(new Route(
-//			'GET',
-//			self::API_PREFIX . 'extensions',
-//			new \Akeeba\PanopticonConnector\Controller\Extensions()
-//		));
+		$router->addRoute(new Route(
+			'GET',
+			self::API_PREFIX . 'extensions',
+			new \Akeeba\PanopticonConnector\Controller\Extensions()
+		));
 
 		// TODO POST updates
 //		$router->addRoute(new Route(

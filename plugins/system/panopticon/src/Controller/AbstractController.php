@@ -63,11 +63,11 @@ abstract class AbstractController
 	protected function asItemsList(string $type, array $items, Pagination $pagination)
 	{
 		$out = (object) [
-			'links' => [
+			'links' => (object) [
 				'self' => Uri::getInstance()->toString(),
 			],
 			'data'  => [],
-			'meta'  => [
+			'meta'  => (object) [
 				'total-pages' => $pagination->pagesTotal,
 			],
 		];

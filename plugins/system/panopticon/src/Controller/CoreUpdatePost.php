@@ -46,7 +46,7 @@ class CoreUpdatePost extends AbstractController
 		}
 
 		/** @var \JoomlaupdateModelDefault $jUpdateModel */
-		$jUpdateModel = \JModelLegacy::getInstance('Default', 'JoomlaupdateModel');
+		$jUpdateModel = \JModelLegacy::getInstance('Default', 'JoomlaupdateModel', ['ignore_request' => true]);
 
 		$jUpdateModel->applyUpdateSite();
 
