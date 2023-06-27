@@ -250,12 +250,11 @@ class plgSystemPanopticon extends \JPlugin
 			new \Akeeba\PanopticonConnector\Controller\AkeebaBackupInfo()
 		));
 
-		// TODO POST admintools/unblock
-//		$router->addRoute(new Route(
-//			'POST',
-//			self::API_PREFIX . 'admintools/unblock',
-//			new \Akeeba\PanopticonConnector\Controller\AdmintoolsUnblock()
-//		));
+		$router->addRoute(new Route(
+			'POST',
+			self::API_PREFIX . 'admintools/unblock',
+			new \Akeeba\PanopticonConnector\Controller\AdmintoolsUnblock()
+		));
 
 		// TODO POST admintools/plugin/disable
 //		$router->addRoute(new Route(
