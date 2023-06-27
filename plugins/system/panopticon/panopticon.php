@@ -228,12 +228,15 @@ class plgSystemPanopticon extends \JPlugin
 			new \Akeeba\PanopticonConnector\Controller\CoreUpdateDownload()
 		));
 
-		// TODO POST core/update/activate
-//		$router->addRoute(new Route(
-//			'POST',
-//			self::API_PREFIX . 'core/update/activate',
-//			new \Akeeba\PanopticonConnector\Controller\CoreUpdateActivate()
-//		));
+		// TODO Chunked downloads (future featur)
+		// GET core/update/chunk_start
+		// GET core/update/chunk_step
+
+		$router->addRoute(new Route(
+			'POST',
+			self::API_PREFIX . 'core/update/activate',
+			new \Akeeba\PanopticonConnector\Controller\CoreUpdateActivate()
+		));
 
 		// TODO POST core/update/postupdate
 //		$router->addRoute(new Route(

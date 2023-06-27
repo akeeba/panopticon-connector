@@ -8,6 +8,8 @@
 namespace Akeeba\PanopticonConnector\Model;
 
 
+use Joomla\CMS\Filesystem\File;
+
 defined('_JEXEC') || die;
 
 if (!class_exists(\JoomlaupdateModelDefault::class))
@@ -58,4 +60,28 @@ class CoreUpdateModel extends \JoomlaupdateModelDefault
 
 		return $packageURL;
 	}
+
+	public function removeExtractPasswordFile()
+	{
+		$basePath = JPATH_ADMINISTRATOR . '/components/com_joomlaupdate';
+
+		if (File::exists($basePath . '/update.php'))
+		{
+			File::delete($basePath . '/update.php');
+		}
+
+		if (File::exists($basePath . '/restoration.php'))
+		{
+			File::delete($basePath . '/restoration.php');
+		}
+	}
+
+	public function cleanUp()
+	{
+		$this->removeExtractPasswordFile();
+
+		parent::cleanUp();
+	}
+
+
 }
