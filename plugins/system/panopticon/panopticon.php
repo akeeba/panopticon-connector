@@ -238,12 +238,11 @@ class plgSystemPanopticon extends \JPlugin
 			new \Akeeba\PanopticonConnector\Controller\CoreUpdateActivate()
 		));
 
-		// TODO POST core/update/postupdate
-//		$router->addRoute(new Route(
-//			'POST',
-//			self::API_PREFIX . 'core/update/postupdate',
-//			new \Akeeba\PanopticonConnector\Controller\CoreUpdatePostupdate()
-//		));
+		$router->addRoute(new Route(
+			'POST',
+			self::API_PREFIX . 'core/update/postupdate',
+			new \Akeeba\PanopticonConnector\Controller\CoreUpdatePostupdate()
+		));
 
 		// TODO POST admintools/unblock
 //		$router->addRoute(new Route(

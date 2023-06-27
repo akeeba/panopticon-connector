@@ -15,7 +15,12 @@ class CoreUpdateActivate extends AbstractController
 {
 	public function __invoke(\JInput $input): object
 	{
-		$basename = $input->getRaw('basename', null);
+		$basename = $input->get('basename', null, 'raw');
+
+		if (strpos($basename, DIRECTORY_SEPARATOR) !== false || strpos($basename, '/') !== false)
+		{
+			$basename = basename($basename);
+		}
 
 		/** @var CoreUpdateModel $model */
 		$model = new CoreUpdateModel(['ignore_request' => true]);
