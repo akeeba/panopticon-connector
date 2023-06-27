@@ -244,6 +244,12 @@ class plgSystemPanopticon extends \JPlugin
 			new \Akeeba\PanopticonConnector\Controller\CoreUpdatePostupdate()
 		));
 
+		$router->addRoute(new Route(
+			'GET',
+			self::API_PREFIX . 'akeebabackup/info',
+			new \Akeeba\PanopticonConnector\Controller\AkeebaBackupInfo()
+		));
+
 		// TODO POST admintools/unblock
 //		$router->addRoute(new Route(
 //			'POST',
