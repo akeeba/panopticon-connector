@@ -298,12 +298,11 @@ class plgSystemPanopticon extends \JPlugin
 			new \Akeeba\PanopticonConnector\Controller\AdmintoolsScannerStep()
 		));
 
-		// TODO POST admintools/scans
-//		$router->addRoute(new Route(
-//			'GET',
-//			self::API_PREFIX . 'admintools/scans',
-//			new \Akeeba\PanopticonConnector\Controller\AdmintoolsScans()
-//		));
+		$router->addRoute(new Route(
+			'GET',
+			self::API_PREFIX . 'admintools/scans',
+			new \Akeeba\PanopticonConnector\Controller\AdmintoolsScans()
+		));
 
 		return $router;
 	}
