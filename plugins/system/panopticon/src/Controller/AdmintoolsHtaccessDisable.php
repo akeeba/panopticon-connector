@@ -9,6 +9,7 @@ namespace Akeeba\PanopticonConnector\Controller;
 
 defined('_JEXEC') || die;
 
+use Akeeba\AdminTools\Admin\Model\ControlPanel;
 use Akeeba\PanopticonConnector\Controller\Mixit\AdminToolsTrait;
 
 class AdmintoolsHtaccessDisable extends AbstractController
@@ -17,6 +18,36 @@ class AdmintoolsHtaccessDisable extends AbstractController
 
 	public function __invoke(\JInput $input): object
 	{
-		// TODO: Implement __invoke() method.
+		$ret = (object) [
+			'id'      => 0,
+			'exists'  => false,
+			'renamed' => true,
+		];
+
+		$from = JPATH_SITE . '/.htaccess';
+		$to   = JPATH_SITE . '/.htaccess.admintools';
+
+		if (!file_exists($from) && file_exists($to))
+		{
+			$ret->exists  = false;
+			$ret->renamed = true;
+		}
+		elseif (!file_exists($from))
+		{
+			$ret->exists  = false;
+			$ret->renamed = false;
+		}
+		elseif (@rename($from, $to))
+		{
+			$ret->exists  = true;
+			$ret->renamed = true;
+		}
+		else
+		{
+			$ret->exists  = true;
+			$ret->renamed = false;
+		}
+
+		return $this->asSingleItem('admintools', $ret);
 	}
 }

@@ -268,12 +268,11 @@ class plgSystemPanopticon extends \JPlugin
 			new \Akeeba\PanopticonConnector\Controller\AdmintoolsPluginEnable()
 		));
 
-		// TODO POST admintools/htaccess/disable
-//		$router->addRoute(new Route(
-//			'POST',
-//			self::API_PREFIX . 'admintools/htaccess/disable',
-//			new \Akeeba\PanopticonConnector\Controller\AdmintoolsHtaccessDisable()
-//		));
+		$router->addRoute(new Route(
+			'POST',
+			self::API_PREFIX . 'admintools/htaccess/disable',
+			new \Akeeba\PanopticonConnector\Controller\AdmintoolsHtaccessDisable()
+		));
 
 		// TODO POST admintools/htaccess/enable
 //		$router->addRoute(new Route(
