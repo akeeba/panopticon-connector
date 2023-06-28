@@ -1,24 +1,28 @@
 ### Get Joomla update information
 GET {{endpoint}}/v1/panopticon/core/update
 Authorization: Bearer {{api_token}}
+X-Joomla-Token: {{api_token}}
 Accept: application/vnd.api+json
 User-Agent: FooBar/1.0
 
 ### Forcibly get Joomla update information
 GET {{endpoint}}/v1/panopticon/core/update?force=1
 Authorization: Bearer {{api_token}}
+X-Joomla-Token: {{api_token}}
 Accept: application/vnd.api+json
 User-Agent: FooBar/1.0
 
 ### Apply the update site
 POST {{endpoint}}/v1/panopticon/core/update
 Authorization: Bearer {{api_token}}
+X-Joomla-Token: {{api_token}}
 Accept: application/vnd.api+json
 User-Agent: FooBar/1.0
 
 ### Change the update source to Testing
 POST {{endpoint}}/v1/panopticon/core/update
 Authorization: Bearer {{api_token}}
+X-Joomla-Token: {{api_token}}
 Accept: application/vnd.api+json
 User-Agent: FooBar/1.0
 Content-Type: application/x-www-form-urlencoded
@@ -28,6 +32,7 @@ updatesource=testing
 ### Change the update source to Default
 POST {{endpoint}}/v1/panopticon/core/update
 Authorization: Bearer {{api_token}}
+X-Joomla-Token: {{api_token}}
 Accept: application/vnd.api+json
 User-Agent: FooBar/1.0
 Content-Type: application/x-www-form-urlencoded
@@ -37,12 +42,14 @@ updatesource=nochange
 ### Download the update
 POST {{endpoint}}/v1/panopticon/core/update/download
 Authorization: Bearer {{api_token}}
+X-Joomla-Token: {{api_token}}
 Accept: application/vnd.api+json
 User-Agent: FooBar/1.0
 
 ### Activate the extraction script
 POST {{endpoint}}/v1/panopticon/core/update/activate
 Authorization: Bearer {{api_token}}
+X-Joomla-Token: {{api_token}}
 Accept: application/vnd.api+json
 User-Agent: FooBar/1.0
 Content-Type: application/x-www-form-urlencoded
@@ -52,6 +59,7 @@ basename=Joomla_4.3.0-Stable-Update_Package.zip
 ### Post-update code
 POST {{endpoint}}/v1/panopticon/core/update/postupdate
 Authorization: Bearer {{api_token}}
+X-Joomla-Token: {{api_token}}
 Accept: application/vnd.api+json
 User-Agent: FooBar/1.0
 Content-Type: application/x-www-form-urlencoded
@@ -61,5 +69,6 @@ basename=Joomla_4.3.0-Stable-Update_Package.zip
 ### Disable the extraction script
 POST {{endpoint}}/v1/panopticon/core/update/disable
 Authorization: Bearer {{api_token}}
+X-Joomla-Token: {{api_token}}
 Accept: application/vnd.api+json
 User-Agent: FooBar/1.0

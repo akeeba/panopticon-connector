@@ -117,23 +117,18 @@ class Pkg_panopticonInstallerScript extends InstallerScript
 	 */
 	private function getUpgradeModel(): ?UpgradeModel
 	{
+		/** @var \Composer\Autoload\ClassLoader $loader */
+		$loader = include JPATH_LIBRARIES . '/vendor/autoload.php';
+		$loader->setPsr4('Akeeba\\Component\\Panopticon\\Administrator\\', JPATH_ADMINISTRATOR . '/components/com_panopticon/src');
+
 		// Make sure the latest version of the Model file will be loaded, regardless of the OPcache state.
 		$filePath = JPATH_ADMINISTRATOR . '/components/com_panopticon/src/Model/UpgradeModel.php';
 
+		clearstatcache();
+
 		if (function_exists('opcache_invalidate'))
 		{
-			opcache_invalidate($filePath = JPATH_ADMINISTRATOR . '/components/com_panopticon/src/Model/UpgradeModel.php');
-		}
-
-		// Can I please load the model?
-		if (!class_exists('\Akeeba\Component\Panopticon\Administrator\Model\UpgradeModel'))
-		{
-			if (!file_exists($filePath) || !is_readable($filePath))
-			{
-				return null;
-			}
-
-			include_once $filePath;
+			opcache_invalidate($filePath);
 		}
 
 		if (!class_exists('\Akeeba\Component\Panopticon\Administrator\Model\UpgradeModel'))

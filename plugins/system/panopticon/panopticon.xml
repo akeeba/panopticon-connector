@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ @package   panopticon
+  ~ @copyright Copyright (c)2023-2023 Nicholas K. Dionysopoulos / Akeeba Ltd
+  ~ @license   https://www.gnu.org/licenses/agpl-3.0.txt GNU Affero General Public License, version 3 or later
+  -->
+
+<extension type="plugin" group="system" version="3.9" method="upgrade">
+    <name>PLG_SYSTEM_PANOPTICON</name>
+    <version>1.0.0</version>
+    <creationDate>2023-06-23</creationDate>
+    <author>Nicholas K. Dionysopoulos</author>
+    <authorEmail>nicholas@dionysopoulos.me</authorEmail>
+    <authorUrl>https://www.akeeba.com</authorUrl>
+    <copyright>Copyright (c)2023-2023 Nicholas K. Dionysopoulos / Akeeba Ltd</copyright>
+    <license>GNU General Public License version 3, or later</license>
+    <description>PLG_SYSTEM_PANOPTICON_XML_DESCRIPTION</description>
+
+    <files>
+        <folder>fields</folder>
+        <folder>src</folder>
+        <folder>tmpl</folder>
+
+        <file plugin="panopticon">panopticon.php</file>
+        <file>version.php</file>
+    </files>
+
+    <languages folder="language">
+        <language tag="en-GB">en-GB/en-GB.plg_system_panopticon.ini</language>
+        <language tag="en-GB">en-GB/en-GB.plg_system_panopticon.sys.ini</language>
+    </languages>
+
+    <config>
+        <fields name="params" addfieldpath="/plugins/system/panopticon/fields">
+            <fieldset name="basic">
+                <field name="dummy1"
+                       label=""
+                       type="panopticoninfo"
+                       default=""
+                       readonly="true"
+                />
+            </fieldset>
+        </fields>
+    </config>
+</extension>

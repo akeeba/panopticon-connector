@@ -31,7 +31,7 @@ $this->document->getWebAssetManager()
 ?>
 <div class="card">
 	<h3 class="card-header bg-secondary text-white">
-		Connection Information
+		<?= Text::_('COM_PANOPTICON_WELCOME_INFO_HEAD') ?>
 	</h3>
 	<div class="card-body">
 		<p class="text-muted">

@@ -654,17 +654,17 @@ ENDDATA;
 			return 'stable';
 		}
 
-		if (str_starts_with($tag, 'alpha'))
+		if (strpos($tag, 'alpha') === 0)
 		{
 			return 'alpha';
 		}
 
-		if (str_starts_with($tag, 'beta'))
+		if (strpos($tag, 'beta') === 0)
 		{
 			return 'beta';
 		}
 
-		if (str_starts_with($tag, 'rc'))
+		if (strpos($tag, 'rc') === 0)
 		{
 			return 'rc';
 		}

@@ -43,8 +43,7 @@
 
     <fileset dir="${dirs.release}" id="package">
         <include name="com_*.zip"/>
-        <include name="mod_*.zip" />
-        <include name="plg_*.zip"/>
+        <include name="plg_webservices*.zip"/>
         <include name="pkg_*.xml"/>
         <include name="language/**"/>
         <include name="*.txt"/>
@@ -90,6 +89,16 @@
                 <token key="PRO" value="1"/>
             </replacetokens>
         </filterchain>
+
+        <if>
+            <available file="${dirs.templates}/version.php" property="completely.ignored" />
+            <then>
+                <copy file="${dirs.templates}/version.php" tofile="${dirs.plugins}/system/panopticon/version.php" overwrite="true">
+                    <filterchain refid="standard-tokens" />
+                </copy>
+            </then>
+        </if>
+
     </target>
 
     <!--

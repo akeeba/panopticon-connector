@@ -2,6 +2,7 @@
 # Unblock an IP address
 POST {{endpoint}}/v1/panopticon/admintools/unblock
 Authorization: Bearer {{api_token}}
+X-Joomla-Token: {{api_token}}
 Accept: application/vnd.api+json
 User-Agent: FooBar/1.0
 Content-Type: application/x-www-form-urlencoded
@@ -12,6 +13,7 @@ ip=123.234.123.234
 # Disable Admin Tools' system plugin (rename `provider.php` to `provider-disable.php`)
 POST {{endpoint}}/v1/panopticon/admintools/plugin/disable
 Authorization: Bearer {{api_token}}
+X-Joomla-Token: {{api_token}}
 Accept: application/vnd.api+json
 User-Agent: FooBar/1.0
 
@@ -23,6 +25,7 @@ User-Agent: FooBar/1.0
 #			'-provider.php',
 POST {{endpoint}}/v1/panopticon/admintools/plugin/enable
 Authorization: Bearer {{api_token}}
+X-Joomla-Token: {{api_token}}
 Accept: application/vnd.api+json
 User-Agent: FooBar/1.0
 
@@ -46,6 +49,7 @@ User-Agent: FooBar/1.0
 # Create a temporary Super User account
 POST {{endpoint}}/v1/panopticon/admintools/tempsuperuser
 Authorization: Bearer {{api_token}}
+X-Joomla-Token: {{api_token}}
 Accept: application/vnd.api+json
 User-Agent: FooBar/1.0
 
@@ -55,6 +59,7 @@ expiration=2023-12-31 20:10:00
 # Start the PHP File Change Scanner
 POST {{endpoint}}/v1/panopticon/admintools/scanner/start
 Authorization: Bearer {{api_token}}
+X-Joomla-Token: {{api_token}}
 Accept: application/vnd.api+json
 User-Agent: FooBar/1.0
 
@@ -62,6 +67,7 @@ User-Agent: FooBar/1.0
 # Step throught the PHP File Change Scanner
 POST {{endpoint}}/v1/panopticon/admintools/scanner/step
 Authorization: Bearer {{api_token}}
+X-Joomla-Token: {{api_token}}
 Accept: application/vnd.api+json
 User-Agent: FooBar/1.0
 
@@ -69,6 +75,7 @@ User-Agent: FooBar/1.0
 # Get a list of all scans, with their status
 GET {{endpoint}}/v1/panopticon/admintools/scans
 Authorization: Bearer {{api_token}}
+X-Joomla-Token: {{api_token}}
 Accept: application/vnd.api+json
 User-Agent: FooBar/1.0
 
@@ -76,6 +83,7 @@ User-Agent: FooBar/1.0
 # Get a list of all scanned files (`scanalerts`) for a specific scan
 GET {{endpoint}}/v1/panopticon/admintools/scan/27
 Authorization: Bearer {{api_token}}
+X-Joomla-Token: {{api_token}}
 Accept: application/vnd.api+json
 User-Agent: FooBar/1.0
 
@@ -83,5 +91,6 @@ User-Agent: FooBar/1.0
 # Get information about a specific scanned file (`scanalert`)
 GET {{endpoint}}/v1/panopticon/admintools/scanalert/29621
 Authorization: Bearer {{api_token}}
+X-Joomla-Token: {{api_token}}
 Accept: application/vnd.api+json
 User-Agent: FooBar/1.0

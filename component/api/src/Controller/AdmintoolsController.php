@@ -284,7 +284,7 @@ class AdmintoolsController extends ApiController
 
 		$this->setScannerState($sessionData);
 
-		// Load the model and ste the scan
+		// Load the model and step the scan
 		$model = $this->getAdminToolsMVCFactory()->createModel('Scans', 'Administrator');
 
 		$result = (object) $model->stepScan();
