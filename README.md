@@ -1,21 +1,28 @@
 # Akeeba Panopticon Connector
 
-The Joomla 4.x connector package for Akeeba Panopticon.
+Allows you to connect Joomla 4.0 and later sites to [Akeeba Panopticon](https://github.com/akeeba/panopticon).
 
-## What is it?
+## Requirements
 
-This package needs to be installed on Joomla sites which will be managed by Akeeba Panopticon. It provides the JSON API routes used by Akeeba Panopticon to retrieve information about software installed on the site and perform maintenance operations on it.
+* Joomla 4.0, 4.1, 4.2, 4.3, 4.4, or 5.0
+* PHP 7.2, 7.3, 7.4, 8.0, 8.1, or 8.2
+* (Optional) Akeeba Backup Professional 9.x — to enable backup features
+* (Optional) Admin Tools Professional 7.x — to enable security features
 
-## WORK IN PROGRESS
+## License
 
-This is work in progress. It will take a while before it's in a usable state. The target for stable release is Q2 2024, depending on the breadth and depth of changes in upcoming Joomla and PHP versions.
+Akeeba Panopticon Connector for Joomla! 3
+Copyright (C) 2023  Nikolaos Dionysopoulos / Akeeba Ltd
 
-## Building from sources
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-**TODO: Expand on this**
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
 
-Install Akeeba BuildFiles one level up, on `buildfiles`
-
-Run `phing git` in the repo's root.
-
-Requires Composer and Phing to be already installed.
+You should have received a copy of the [GNU Affero General Public License](LICENSE.txt)
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
