@@ -23,7 +23,7 @@ class Pkg_panopticonInstallerScript extends InstallerScript
 	 */
 	protected $dbo;
 
-	protected $minimumPhp = '7.4.0';
+	protected $minimumPhp = '7.2.5';
 
 	protected $minimumJoomla = '4.0.0';
 
