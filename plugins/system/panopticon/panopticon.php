@@ -286,12 +286,11 @@ class plgSystemPanopticon extends \JPlugin
 			new \Akeeba\PanopticonConnector\Controller\AdmintoolsTempsuperuser()
 		));
 
-		// TODO POST admintools/scanner/start
-//		$router->addRoute(new Route(
-//			'POST',
-//			self::API_PREFIX . 'admintools/scanner/start',
-//			new \Akeeba\PanopticonConnector\Controller\AdmintoolsScannerStart()
-//		));
+		$router->addRoute(new Route(
+			'POST',
+			self::API_PREFIX . 'admintools/scanner/start',
+			new \Akeeba\PanopticonConnector\Controller\AdmintoolsScannerStart()
+		));
 
 		// TODO POST admintools/scanner/step
 //		$router->addRoute(new Route(

@@ -9,6 +9,7 @@ namespace Akeeba\PanopticonConnector\Controller;
 
 defined('_JEXEC') || die;
 
+use Akeeba\AdminTools\Site\Model\Scans;
 use Akeeba\PanopticonConnector\Controller\Mixit\AdminToolsTrait;
 
 class AdmintoolsScannerStart extends AbstractController
@@ -17,6 +18,14 @@ class AdmintoolsScannerStart extends AbstractController
 
 	public function __invoke(\JInput $input): object
 	{
-		// TODO: Implement __invoke() method.
+		/** @var Scans $model */
+		$container = $this->getAdminToolsContainer();
+		$model     = $container->factory->model('Scans')->tmpInstance();
+
+		$result          = (object) $model->startScan('api');
+		$result->session = $this->getScannerState();
+		$result->id      = $result->id ?? $result->session['com_admintools.filescanner.scanID'] ?? 0;
+
+		return $this->asSingleItem('admintools', $result);
 	}
 }

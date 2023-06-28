@@ -62,4 +62,29 @@ trait AdminToolsTrait
 
 		return $container;
 	}
+
+	private function getScannerState(): array
+	{
+		$scannerSession = \Akeeba\AdminTools\Admin\Model\Scanner\Util\Session::getInstance();
+		$session        = \JFactory::getApplication()->getSession();
+		$ret            = [];
+
+		foreach ($scannerSession->getKnownKeys() as $key)
+		{
+			$key       = 'com_admintools.filescanner.' . $key;
+			$ret[$key] = $session->get($key, null);
+		}
+
+		return $ret;
+	}
+
+	private function setScannerState(array $sessionData): void
+	{
+		$session = \JFactory::getApplication()->getSession();
+
+		foreach ($sessionData as $k => $v)
+		{
+			$session->set($k, $v);
+		}
+	}
 }
