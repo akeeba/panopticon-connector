@@ -9,6 +9,7 @@ namespace Akeeba\PanopticonConnector\Controller;
 
 defined('_JEXEC') || die;
 
+use Akeeba\AdminTools\Admin\Model\ControlPanel;
 use Akeeba\PanopticonConnector\Controller\Mixit\AdminToolsTrait;
 
 class AdmintoolsPluginEnable extends AbstractController
@@ -17,6 +18,27 @@ class AdmintoolsPluginEnable extends AbstractController
 
 	public function __invoke(\JInput $input): object
 	{
-		// TODO: Implement __invoke() method.
+		/** @var ControlPanel $model */
+		$container = $this->getAdminToolsContainer();
+		$model     = $container->factory->model('ControlPanel');
+
+		$ret   = (object) [
+			'id'      => 0,
+			'renamed' => true,
+			'name'    => null,
+		];
+
+		if (!$model->isMainPhpDisabled())
+		{
+			return $this->asSingleItem('admintools', $ret);
+		}
+
+		if (!$model->reenableMainPhp())
+		{
+			$ret->renamed = true;
+			$ret->name    = $model->getRenamedMainPhp();
+		}
+
+		return $this->asSingleItem('admintools', $ret);
 	}
 }

@@ -20,7 +20,7 @@ class AdmintoolsPluginDisable extends AbstractController
 	{
 		/** @var ControlPanel $model */
 		$container = $this->getAdminToolsContainer();
-		$model = $container->factory->model('ControlPanel');
+		$model     = $container->factory->model('ControlPanel');
 
 		$ret   = (object) [
 			'id'      => 0,
