@@ -17,6 +17,36 @@ class AdmintoolsHtaccessEnable extends AbstractController
 
 	public function __invoke(\JInput $input): object
 	{
-		// TODO: Implement __invoke() method.
+		$ret = (object) [
+			'id'       => 0,
+			'exists'   => false,
+			'restored' => false,
+		];
+
+		$from = JPATH_SITE . '/.htaccess.admintools';
+		$to   = JPATH_SITE . '/.htaccess';
+
+		if (!file_exists($from) && file_exists($to))
+		{
+			$ret->exists   = false;
+			$ret->restored = true;
+		}
+		elseif (!file_exists($from))
+		{
+			$ret->exists   = false;
+			$ret->restored = false;
+		}
+		elseif (@rename($from, $to))
+		{
+			$ret->exists   = true;
+			$ret->restored = true;
+		}
+		else
+		{
+			$ret->exists   = true;
+			$ret->restored = false;
+		}
+
+		return $this->asSingleItem('admintools', $ret);
 	}
 }
