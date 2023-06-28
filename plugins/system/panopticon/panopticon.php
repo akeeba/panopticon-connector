@@ -280,12 +280,11 @@ class plgSystemPanopticon extends \JPlugin
 			new \Akeeba\PanopticonConnector\Controller\AdmintoolsHtaccessEnable()
 		));
 
-		// TODO POST admintools/htaccess/tempsuperuser
-//		$router->addRoute(new Route(
-//			'POST',
-//			self::API_PREFIX . 'admintools/tempsuperuser',
-//			new \Akeeba\PanopticonConnector\Controller\AdmintoolsTempsuperuser()
-//		));
+		$router->addRoute(new Route(
+			'POST',
+			self::API_PREFIX . 'admintools/tempsuperuser',
+			new \Akeeba\PanopticonConnector\Controller\AdmintoolsTempsuperuser()
+		));
 
 		// TODO POST admintools/scanner/start
 //		$router->addRoute(new Route(
