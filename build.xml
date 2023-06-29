@@ -90,15 +90,6 @@
             </replacetokens>
         </filterchain>
 
-        <if>
-            <available file="${dirs.templates}/version.php" property="completely.ignored" />
-            <then>
-                <copy file="${dirs.templates}/version.php" tofile="${dirs.plugins}/system/panopticon/version.php" overwrite="true">
-                    <filterchain refid="standard-tokens" />
-                </copy>
-            </then>
-        </if>
-
     </target>
 
     <!--
