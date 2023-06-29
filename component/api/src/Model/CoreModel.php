@@ -86,6 +86,7 @@ class CoreModel extends UpdateModel
 			'updateSiteUrl'       => null,
 			'lastUpdateTimestamp' => null,
 			'phpVersion'          => PHP_VERSION,
+			'overridesChanged'    => $this->getNumberOfTemplateOverridesChanged(),
 			'panopticon'          => [
 				'version' => $version,
 				'date'    => $date,
@@ -839,6 +840,23 @@ ENDDATA;
 		catch (Exception $e)
 		{
 			return new Registry();
+		}
+	}
+
+	private function getNumberOfTemplateOverridesChanged(): int
+	{
+		$db    = method_exists($this, 'getDatabase') ? $this->getDatabase() : $this->getDbo();
+		$query = $db->getQuery(true)
+			->select('COUNT(*)')
+			->from($db->quoteName('#__template_overrides'));
+
+		try
+		{
+			return $db->setQuery($query)->loadResult() ?: 0;
+		}
+		catch (Exception $e)
+		{
+			return 0;
 		}
 	}
 }

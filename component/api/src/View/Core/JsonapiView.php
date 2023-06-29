@@ -39,6 +39,7 @@ class JsonapiView extends BaseJsonApiView
 				'updateSiteUrl',
 				'lastUpdateTimestamp',
 				'phpVersion',
+				'overridesChanged',
 				'panopticon',
 				'admintools'
 			];
