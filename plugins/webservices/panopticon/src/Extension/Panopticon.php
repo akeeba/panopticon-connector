@@ -189,6 +189,15 @@ class Panopticon extends CMSPlugin implements SubscriberInterface
 			$defaults
 		);
 
+		// Akeeba Backup
+		$routes[] = new Route(
+			['GET'],
+			self::API_PREFIX . 'akeebabackup/info',
+			'backup.version',
+			[],
+			$defaults
+		);
+
 		// Admin Tools: Unblock an IP address
 		$routes[] = new Route(
 			['POST'],
