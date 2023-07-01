@@ -180,12 +180,19 @@ class Panopticon extends CMSPlugin implements SubscriberInterface
 			$defaults
 		);
 
-		// TODO 📋Consumer code in planning stage
 		$routes[] = new Route(
 			['GET'],
 			self::API_PREFIX . 'template/overrides/changed',
 			'templatechanged.displayList',
 			[],
+			$defaults
+		);
+
+		$routes[] = new Route(
+			['GET'],
+			self::API_PREFIX . 'template/overrides/changed/:id',
+			'templatechanged.displayItem',
+			['id' => '(\d+)'],
 			$defaults
 		);
 

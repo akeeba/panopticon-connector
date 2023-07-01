@@ -14,10 +14,26 @@ class JsonapiView extends \Joomla\CMS\MVC\View\JsonApiView
 	protected $fieldsToRenderList = [
 		'id',
 		'template',
+		'hash_id',
 		'extension_id',
 		'state',
 		'action',
+		'client_id',
 		'created_date',
 		'modified_date',
+	];
+
+	protected $fieldsToRenderItem = [
+		'id',
+		'template',
+		'client',
+		'name',
+		'overridePath',
+		'overridePathRelative',
+		'overrideSource',
+		'corePath',
+		'corePathRelative',
+		'coreSource',
+		'diff',
 	];
 }
