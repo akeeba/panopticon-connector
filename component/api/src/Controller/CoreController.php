@@ -105,6 +105,50 @@ class CoreController extends ApiController
 		$this->app->setHeader('status', 200);
 	}
 
+	public function downloadUpdateChunked()
+	{
+		if (!$this->app->getIdentity()->authorise('core.manage', 'com_joomlaupdate'))
+		{
+			throw new NotAllowed($this->app->getLanguage()->_('JERROR_ALERTNOAUTHOR'), 403);
+		}
+
+		// Get potential POST parameters, used to resume the chunk download
+		$url         = $this->input->post->get('url', null, 'raw');
+		$size        = (int) $this->input->post->get('size', -1, 'int') ?: -1;
+		$offset      = $this->input->post->get('offset', -1, 'int') ?: -1;
+		$chunk_index = $this->input->post->get('chunk_index', -1, 'int') ?: -1;
+		$max_time    = $this->input->post->get('max_time', -1, 'int') ?: -1;
+
+		// Sanitise values
+		$url         = empty($url) ? null : (filter_var($url, FILTER_SANITIZE_URL) ?: null);
+		$size        = $size >= 0 ? $size : null;
+		$offset      = $offset >= 0 ? $offset : null;
+		$chunk_index = $chunk_index >= 0 ? $chunk_index : null;
+		$max_time    = $max_time >= 0 ? $max_time : null;
+
+		// Pass values to the model
+		/** @var CoreModel $model */
+		$model = $this->getModel();
+		$model->setState('download.url', $url);
+		$model->setState('download.size', $size);
+		$model->setState('download.offset', $offset);
+		$model->setState('download.chunk_index', $chunk_index);
+		$model->setState('download.max_time', $max_time);
+
+		// Perform a chunk download
+		$result       = $model->downloadChunkedUpdateByPanopticon();
+		$result['id'] = 0;
+
+		// Return the result to the caller
+		$serializer = new JoomlaSerializer('coreupdatedownloadchunked');
+		$element    = (new Resource((object) $result, $serializer))
+			->fields(array_keys($result));
+
+		$this->app->getDocument()->setData($element);
+		$this->app->getDocument()->addLink('self', Uri::current());
+		$this->app->setHeader('status', 200);
+	}
+
 	public function activateExtract()
 	{
 		if (!$this->app->getIdentity()->authorise('core.manage', 'com_joomlaupdate'))

@@ -46,6 +46,23 @@ X-Joomla-Token: {{api_token}}
 Accept: application/vnd.api+json
 User-Agent: FooBar/1.0
 
+### Download the update, chunked
+POST {{endpoint}}/v1/panopticon/core/update/download/chunked
+Authorization: Bearer {{api_token}}
+X-Joomla-Token: {{api_token}}
+Accept: application/vnd.api+json
+User-Agent: FooBar/1.0
+
+### Continue downloading the update, chunked
+POST {{endpoint}}/v1/panopticon/core/update/download/chunked
+Authorization: Bearer {{api_token}}
+X-Joomla-Token: {{api_token}}
+Accept: application/vnd.api+json
+User-Agent: FooBar/1.0
+Content-Type: application/x-www-form-urlencoded
+
+url=https://update.joomla.org/releases/4.3.3/Joomla_4.3.3-Stable-Update_Package.zip&size=28745988&offset=15728640&chunk_index=7&max_time=30
+
 ### Activate the extraction script
 POST {{endpoint}}/v1/panopticon/core/update/activate
 Authorization: Bearer {{api_token}}

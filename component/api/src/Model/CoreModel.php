@@ -15,6 +15,7 @@ use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Extension\ExtensionHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Filesystem\File;
+use Joomla\CMS\Http\HttpFactory;
 use Joomla\CMS\MVC\Factory\MVCFactory;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Updater\Updater;
@@ -26,6 +27,7 @@ use Joomla\Database\DatabaseDriver;
 use Joomla\Database\ParameterType;
 use Joomla\Registry\Registry;
 use ReflectionClass;
+use RuntimeException;
 use Throwable;
 
 class CoreModel extends UpdateModel
@@ -330,7 +332,7 @@ class CoreModel extends UpdateModel
 
 		if (empty($basename))
 		{
-			throw new \RuntimeException('The update package\'s file name cannot be determined automatically.', 400);
+			throw new RuntimeException('The update package\'s file name cannot be determined automatically.', 400);
 		}
 
 		// Get the package name.
@@ -505,6 +507,360 @@ ENDDATA;
 		// Trigger event after joomla update.
 		$app->triggerEvent('onJoomlaAfterUpdate', [$oldVersion]);
 		$app->setUserState('com_joomlaupdate.oldversion', null);
+	}
+
+	/**
+	 * @return array{basename:string|false, url:string|null, size:int, offset:int, chunk_index:int, done:bool, error: string|null}
+	 * @throws Exception
+	 * @since  1.0.0
+	 */
+	public function downloadChunkedUpdateByPanopticon(): array
+	{
+		/**
+		 * Tobias Zulauf needlessly undermined \Joomla\CMS\Updater\Update to no longer return the downloadSources, as
+		 * he could not correctly troubleshoot the code (hint: he should be emptying $this->downloadSources every time
+		 * _startElement is called with $name === 'UPDATE').
+		 *
+		 * So, instead of using $this->>getUpdateInformation() we have to REINVENT THE WHEEL.
+		 */
+
+		$chunkSizes = [51200, 153600, 262144, 524288, 1048576, 2097152, 5242880, 10485760];
+		$totalStart = microtime(true);
+
+		$url        = $this->getState('download.url') ?: $this->getURLForChunkedDownloads();
+		$size       = $this->getState('download.size')
+			?: call_user_func(function (?string $url) {
+				if (empty($url))
+				{
+					return -1;
+				}
+
+				try
+				{
+					$version    = new Version;
+					$httpOption = new Registry;
+					$httpOption->set('userAgent', $version->getUserAgent('Joomla', true, false));
+					$http     = HttpFactory::getHttp($httpOption);
+					$response = $http->head($url);
+
+					if ($response->code != 200)
+					{
+						return -1;
+					}
+
+					$headers = $response->getHeaders();
+
+					$contentType   = $headers['content-type'] ?? [];
+					$contentType   = is_array($contentType) ? $contentType : [$contentType];
+					$acceptRanges  = $headers['accept-ranges'] ?? [];
+					$acceptRanges  = is_array($acceptRanges) ? $acceptRanges : [$acceptRanges];
+					$contentLength = $headers['content-length'] ?? [-1];
+					$contentLength = is_array($contentLength) ? $contentLength : [$contentLength];
+
+					if (!in_array('application/zip', $contentType) || !in_array('bytes', $acceptRanges))
+					{
+						return -1;
+					}
+
+					$contentLength = array_shift($contentLength);
+
+					return (int) ($contentLength ?: -1);
+				}
+				catch (Exception $e)
+				{
+					return -1;
+				}
+			}, $url);
+		$offset     = (int) $this->getState('download.offset') ?: -1;
+		$chunkIndex = (int) $this->getState('download.chunk_index') ?: 1;
+		$maxTime    = (float) $this->getState('download.max_time', 10);
+		$chunkIndex = max(0, min($chunkIndex, count($chunkSizes) - 1));
+		$basename   = empty($url) ? false : basename($url);
+
+		$result = [
+			'basename'    => $basename,
+			'url'         => $url,
+			'size'        => $size,
+			'offset'      => $offset,
+			'chunk_index' => $chunkIndex,
+			'done'        => true,
+			'error'       => null,
+		];
+
+		if ($result['size'] <= 0)
+		{
+			$result['error'] = 'Could not find a file to download.';
+
+			return $result;
+		}
+
+		// Update the timer
+		$totalElapsed = microtime(true) - $totalStart;
+
+		// Update the basename
+		$result['basename'] = basename($url);
+
+		// Create an HTTP client
+		$version    = new Version;
+		$httpOption = new Registry;
+		$httpOption->set('userAgent', $version->getUserAgent('Joomla', true, false));
+		$http = HttpFactory::getHttp($httpOption);
+
+		// Open the output file.
+		$tempDir   = Factory::getApplication()->get('tmp_path');
+		$outFile   = $tempDir . '/' . $basename;
+
+		try
+		{
+			if ($offset > 0)
+			{
+				clearstatcache(false, $outFile);
+
+				if (!file_exists($outFile))
+				{
+					throw new RuntimeException(
+						sprintf(
+							'The Joomla update package file %s went away',
+							basename($outFile)
+						)
+					);
+				}
+
+				$filesize = @filesize($outFile) ?: 0;
+
+				if ($filesize < $offset)
+				{
+					throw new RuntimeException(
+						sprintf(
+							'The Joomla update package file %s is smaller than expected (expected: %d bytes; current: %d bytes)',
+							basename($outFile), $offset, $filesize
+						)
+					);
+				}
+			}
+
+			$fp = @fopen($outFile, 'wb');
+
+			if ($fp === false)
+			{
+				throw new RuntimeException('Cannot open output file for writing.');
+			}
+
+			// If there's an offset make sure the file size isn't beyond that offset and get ready to append data.
+			if ($offset > 0)
+			{
+				@ftruncate($fp, $offset);
+				@fseek($fp, $offset);
+			}
+
+		}
+		catch (Exception $e)
+		{
+			$result['error'] = $e->getMessage();
+
+			if ($fp !== false)
+			{
+				@fclose($fp);
+			}
+
+			return $result;
+		}
+
+		// Indicate download is not done
+		$result['done'] = false;
+
+		// Start downloading chunks while we have some time
+		while ($totalElapsed < $maxTime)
+		{
+			$chunkSize = $chunkSizes[$chunkIndex];
+
+			// Calculate the current start / end byte
+			$from = max(0, $offset + 1);
+			$to   = max($from + $chunkSize - 1, $size - 1);
+
+			// If the start byte is beyond the content-length we read from the HEAD: break
+			if ($from > $size)
+			{
+				$result['done'] = true;
+
+				break;
+			}
+
+			$startTime = microtime(true);
+
+			// Download the chunk and append to file
+			try
+			{
+				$response = $http->get($url, [
+					'Range' => sprintf('bytes=%d-%d', $from, $to),
+				]);
+
+				if ($response->code != 200 && $response->code != 206)
+				{
+					throw new RuntimeException(sprintf('Invalid HTTP response code: %d', $response->code));
+				}
+
+				$chunk = $response->getBody();
+
+				if (empty($chunk))
+				{
+					throw new RuntimeException(sprintf('No data returned from the remote URL (byte range %d-%d)', $from, $to));
+				}
+
+				$nominalLength = strlen($chunk);
+				$written       = fwrite($fp, $chunk);
+				$chunk         = null;
+
+				if ($written < $nominalLength)
+				{
+					throw new RuntimeException(sprintf('File write failed. Expected to write %d bytes, written %d bytes instead. Check if the server has enough disk space.', $nominalLength, $written ?: 0));
+				}
+
+				$offset           += $written;
+				$result['offset'] = $offset;
+
+				/**
+				 * We use $result['size'] - 1 because the first byte written is the byte with offset zero.
+				 *
+				 * Simply put, if I read two bytes, my offset is 1, not 2.
+				 */
+				if ($offset >= $result['size'] - 1)
+				{
+					$result['done'] = true;
+
+					break;
+				}
+			}
+			catch (Exception $e)
+			{
+				fclose($fp);
+
+				@unlink($outFile);
+
+				$result['error'] = $e->getMessage();
+
+				return $result;
+			}
+
+			// Get the timing information
+			$endTime           = microtime(true);
+			$timeElapsed       = $endTime - $startTime;
+			$totalElapsed      = $endTime - $totalStart;
+			$projectedNextTime = $timeElapsed;
+
+			if ($timeElapsed < 2.0)
+			{
+				// The download was too fast. Increase the chunk size.
+				$chunkIndex        = min(count($chunkSizes) - 1, $chunkIndex + 1);
+				$projectedNextTime = 2.0 * $projectedNextTime;
+			}
+			elseif ($timeElapsed > 4.0)
+			{
+				// The download was too slow. Decrease the chunk size.
+				$chunkIndex        = max(0, $chunkIndex - 1);
+				$projectedNextTime = $projectedNextTime / 2.0;
+			}
+
+			// Update the return array's `chunk_index`
+			$result['chunk_index'] = $chunkIndex;
+
+			// If we might time out in the next step: break early.
+			if ($totalElapsed + $projectedNextTime > $maxTime)
+			{
+				break;
+			}
+		}
+
+		@fclose($fp);
+
+		return $result;
+	}
+
+	private function getURLForChunkedDownloads(): ?string
+	{
+		// Fetch the update information from the database.
+		$id    = ExtensionHelper::getExtensionRecord('joomla', 'file')->extension_id;
+		$db    = version_compare(JVERSION, '4.2.0', 'lt') ? $this->getDbo() : $this->getDatabase();
+		$query = $db->getQuery(true)
+			->select('*')
+			->from($db->quoteName('#__updates'))
+			->where($db->quoteName('extension_id') . ' = :id')
+			->bind(':id', $id, ParameterType::INTEGER);
+		$db->setQuery($query);
+		$updateObject = $db->loadObject();
+
+		// No update? No joy.
+		if (is_null($updateObject))
+		{
+			return null;
+		}
+
+		// Load the XML file from the `detailsurl` of the update object.
+		try
+		{
+			$version    = new Version;
+			$httpOption = new Registry;
+			$httpOption->set('userAgent', $version->getUserAgent('Joomla', true, false));
+			$http     = HttpFactory::getHttp($httpOption);
+			$response = $http->get($updateObject->detailsurl);
+		}
+		catch (RuntimeException $e)
+		{
+			return null;
+		}
+
+		if ($response->code !== 200)
+		{
+			return null;
+		}
+
+		// Use SimpleXML to parse the raw XML data
+		try
+		{
+			$xml = new \SimpleXMLElement($response->body);
+		}
+		catch (Exception $e)
+		{
+			return null;
+		}
+
+		// Extract the download URLs into an array
+		$expression      = sprintf('//update[version="%s"]/downloads/downloadsource[@type="full" and @format="zip"]', $updateObject->version);
+		$downloadSources = $xml->xpath($expression);
+
+		if (!count($downloadSources))
+		{
+			$expression      = sprintf('//update[version="%s"]/downloads/downloadurl[@type="full" and @format="zip"]', $updateObject->version);
+			$downloadSources = $xml->xpath($expression);
+		}
+
+		if (!count($downloadSources))
+		{
+			return null;
+		}
+
+		$urls = [];
+
+		foreach ($downloadSources as $derp)
+		{
+			$urls[] = (string) $derp;
+		}
+
+		// Keep unique values and filter what is left
+		$urls = array_unique($urls);
+		$urls = array_filter(
+			$urls,
+			function ($url) {
+				return !empty($url) && stripos($url, 'update') !== false && stripos($url, '/github.com/') === false;
+			}
+		);
+
+		if (empty($urls))
+		{
+			return null;
+		}
+
+		return array_shift($urls);
 	}
 
 	private function getCoreExtensionID(): int

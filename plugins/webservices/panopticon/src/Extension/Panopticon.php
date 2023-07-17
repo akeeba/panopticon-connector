@@ -157,6 +157,14 @@ class Panopticon extends CMSPlugin implements SubscriberInterface
 
 		$routes[] = new Route(
 			['POST'],
+			self::API_PREFIX . 'core/update/download/chunked',
+			'core.downloadUpdateChunked',
+			[],
+			$defaults
+		);
+
+		$routes[] = new Route(
+			['POST'],
 			self::API_PREFIX . 'core/update/activate',
 			'core.activateExtract',
 			[],
