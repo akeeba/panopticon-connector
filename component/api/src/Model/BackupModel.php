@@ -257,7 +257,7 @@ class BackupModel extends BaseModel
 
 		/**
 		 * A custom application may instead implement the Joomla\Application\ConfigurationAwareApplicationInterface
-		 * interface (Joomla 4+), in whihc case it has the get() method to return application configuration parameters.
+		 * interface (Joomla 4+), in which case it has the get() method to return application configuration parameters.
 		 */
 		if (is_object($app)
 			&& interface_exists('Joomla\Application\ConfigurationAwareApplicationInterface', true)
@@ -293,7 +293,7 @@ class BackupModel extends BaseModel
 			{
 				/**
 				 * Factory tries to go through the application object. It might fail if there is a custom application
-				 * which doesn't implement the interfaces Factory expects. In this case we get a Fatal Error whcih we
+				 * which doesn't implement the interfaces Factory expects. In this case we get a Fatal Error which we
 				 * can trap and fall through to the next if-block.
 				 */
 			}
