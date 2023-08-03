@@ -81,7 +81,7 @@ Apply the update site
 
 Params:
 * `updatesource` Change the update source. Valid options: (empty), 'nochange', 'next', 'testing', 'custom'
-* `updateurl` The URL to the update source, only valid (and requried) if `updatesource` is set to custom
+* `updateurl` The URL to the update source, only valid (and required) if `updatesource` is set to custom
 
 #### ✅ POST /v1/panopticon/core/update/download
 

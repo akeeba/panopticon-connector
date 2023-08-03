@@ -64,7 +64,7 @@ Accept: application/vnd.api+json
 User-Agent: FooBar/1.0
 
 ###
-# Step throught the PHP File Change Scanner
+# Step through the PHP File Change Scanner
 POST {{endpoint}}/v1/panopticon/admintools/scanner/step
 Authorization: Bearer {{api_token}}
 X-Joomla-Token: {{api_token}}
