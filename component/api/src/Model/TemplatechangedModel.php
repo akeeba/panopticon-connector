@@ -142,7 +142,6 @@ class TemplatechangedModel extends ListModel
 			->where([
 				$db->quoteName('s.template') . '=' . $db->quoteName('o.template'),
 				$db->quoteName('s.client_id') . '=' . $client,
-				//$db->quoteName('s.home') . '= 1',
 			]);
 
 		$query = $db->getQuery(true)
@@ -160,7 +159,10 @@ class TemplatechangedModel extends ListModel
 				]
 			))
 			->from($db->quoteName('#__template_overrides', 'o'))
-			->where('EXISTS(' . $subQuery . ')')
+			->where([
+				$db->quoteName('o.state') . ' = 0',
+				'EXISTS(' . $subQuery . ')'
+			])
 			->order([
 				$db->quoteName('client_id') . ' ASC',
 				$db->quoteName('template') . ' ASC',
