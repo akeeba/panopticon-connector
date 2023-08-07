@@ -510,7 +510,8 @@ ENDDATA;
 	}
 
 	/**
-	 * @return array{basename:string|false, url:string|null, size:int, offset:int, chunk_index:int, done:bool, error: string|null}
+	 * @return array{basename:string|false, url:string|null, size:int, offset:int, chunk_index:int, done:bool, error:
+	 *                                      string|null}
 	 * @throws Exception
 	 * @since  1.0.0
 	 */
@@ -529,48 +530,50 @@ ENDDATA;
 
 		$url        = $this->getState('download.url') ?: $this->getURLForChunkedDownloads();
 		$size       = $this->getState('download.size')
-			?: call_user_func(function (?string $url) {
-				if (empty($url))
-				{
-					return -1;
-				}
-
-				try
-				{
-					$version    = new Version;
-					$httpOption = new Registry;
-					$httpOption->set('userAgent', $version->getUserAgent('Joomla', true, false));
-					$http     = HttpFactory::getHttp($httpOption);
-					$response = $http->head($url);
-
-					if ($response->code != 200)
+			?: call_user_func(
+				function (?string $url) {
+					if (empty($url))
 					{
 						return -1;
 					}
 
-					$headers = $response->getHeaders();
+					try
+					{
+						$version    = new Version;
+						$httpOption = new Registry;
+						$httpOption->set('userAgent', $version->getUserAgent('Joomla', true, false));
+						$http     = HttpFactory::getHttp($httpOption);
+						$response = $http->head($url);
 
-					$contentType   = $headers['content-type'] ?? [];
-					$contentType   = is_array($contentType) ? $contentType : [$contentType];
-					$acceptRanges  = $headers['accept-ranges'] ?? [];
-					$acceptRanges  = is_array($acceptRanges) ? $acceptRanges : [$acceptRanges];
-					$contentLength = $headers['content-length'] ?? [-1];
-					$contentLength = is_array($contentLength) ? $contentLength : [$contentLength];
+						if ($response->code != 200)
+						{
+							return -1;
+						}
 
-					if (!in_array('application/zip', $contentType) || !in_array('bytes', $acceptRanges))
+						$headers = $response->getHeaders();
+
+						$contentType   = $headers['content-type'] ?? [];
+						$contentType   = is_array($contentType) ? $contentType : [$contentType];
+						$acceptRanges  = $headers['accept-ranges'] ?? [];
+						$acceptRanges  = is_array($acceptRanges) ? $acceptRanges : [$acceptRanges];
+						$contentLength = $headers['content-length'] ?? [-1];
+						$contentLength = is_array($contentLength) ? $contentLength : [$contentLength];
+
+						if (!in_array('application/zip', $contentType) || !in_array('bytes', $acceptRanges))
+						{
+							return -1;
+						}
+
+						$contentLength = array_shift($contentLength);
+
+						return (int) ($contentLength ?: -1);
+					}
+					catch (Exception $e)
 					{
 						return -1;
 					}
-
-					$contentLength = array_shift($contentLength);
-
-					return (int) ($contentLength ?: -1);
-				}
-				catch (Exception $e)
-				{
-					return -1;
-				}
-			}, $url);
+				}, $url
+			);
 		$offset     = (int) $this->getState('download.offset') ?: -1;
 		$chunkIndex = (int) $this->getState('download.chunk_index') ?: 1;
 		$maxTime    = (float) $this->getState('download.max_time', 10);
@@ -607,8 +610,8 @@ ENDDATA;
 		$http = HttpFactory::getHttp($httpOption);
 
 		// Open the output file.
-		$tempDir   = Factory::getApplication()->get('tmp_path');
-		$outFile   = $tempDir . '/' . $basename;
+		$tempDir = Factory::getApplication()->get('tmp_path');
+		$outFile = $tempDir . '/' . $basename;
 
 		try
 		{
@@ -691,9 +694,11 @@ ENDDATA;
 			// Download the chunk and append to file
 			try
 			{
-				$response = $http->get($url, [
+				$response = $http->get(
+					$url, [
 					'Range' => sprintf('bytes=%d-%d', $from, $to),
-				]);
+				]
+				);
 
 				if ($response->code != 200 && $response->code != 206)
 				{
@@ -704,7 +709,9 @@ ENDDATA;
 
 				if (empty($chunk))
 				{
-					throw new RuntimeException(sprintf('No data returned from the remote URL (byte range %d-%d)', $from, $to));
+					throw new RuntimeException(
+						sprintf('No data returned from the remote URL (byte range %d-%d)', $from, $to)
+					);
 				}
 
 				$nominalLength = strlen($chunk);
@@ -713,7 +720,12 @@ ENDDATA;
 
 				if ($written < $nominalLength)
 				{
-					throw new RuntimeException(sprintf('File write failed. Expected to write %d bytes, written %d bytes instead. Check if the server has enough disk space.', $nominalLength, $written ?: 0));
+					throw new RuntimeException(
+						sprintf(
+							'File write failed. Expected to write %d bytes, written %d bytes instead. Check if the server has enough disk space.',
+							$nominalLength, $written ?: 0
+						)
+					);
 				}
 
 				$offset           += $written;
@@ -825,12 +837,16 @@ ENDDATA;
 		}
 
 		// Extract the download URLs into an array
-		$expression      = sprintf('//update[version="%s"]/downloads/downloadsource[@type="full" and @format="zip"]', $updateObject->version);
+		$expression      = sprintf(
+			'//update[version="%s"]/downloads/downloadsource[@type="full" and @format="zip"]', $updateObject->version
+		);
 		$downloadSources = $xml->xpath($expression);
 
 		if (!count($downloadSources))
 		{
-			$expression      = sprintf('//update[version="%s"]/downloads/downloadurl[@type="full" and @format="zip"]', $updateObject->version);
+			$expression      = sprintf(
+				'//update[version="%s"]/downloads/downloadurl[@type="full" and @format="zip"]', $updateObject->version
+			);
 			$downloadSources = $xml->xpath($expression);
 		}
 
@@ -1202,9 +1218,20 @@ ENDDATA;
 	private function getNumberOfTemplateOverridesChanged(): int
 	{
 		$db    = method_exists($this, 'getDatabase') ? $this->getDatabase() : $this->getDbo();
+		$subQuery = $db->getQuery(true)
+			->select('1')
+			->from($db->quoteName('#__extensions', 'e'))
+			->where($db->quoteName('e.extension_id') . ' = ' . $db->quoteName('o.extension_id'));
 		$query = $db->getQuery(true)
 			->select('COUNT(*)')
-			->from($db->quoteName('#__template_overrides'));
+			->from($db->quoteName('#__template_overrides', 'o'))
+			->where(
+				[
+					$db->quoteName('o.state') . ' = 0',
+					$db->quoteName('o.client_id') . ' = 0',
+					'EXISTS(' . $subQuery . ')',
+				]
+			);
 
 		try
 		{

@@ -138,11 +138,8 @@ class TemplatechangedModel extends ListModel
 
 		$subQuery = $db->getQuery(true)
 			->select('1')
-			->from($db->quoteName('#__template_styles', 's'))
-			->where([
-				$db->quoteName('s.template') . '=' . $db->quoteName('o.template'),
-				$db->quoteName('s.client_id') . '=' . $client,
-			]);
+			->from($db->quoteName('#__extensions', 'e'))
+			->where($db->quoteName('e.extension_id') . ' = ' . $db->quoteName('o.extension_id'));
 
 		$query = $db->getQuery(true)
 			->select($db->quoteName(
@@ -161,13 +158,16 @@ class TemplatechangedModel extends ListModel
 			->from($db->quoteName('#__template_overrides', 'o'))
 			->where([
 				$db->quoteName('o.state') . ' = 0',
+				$db->quoteName('o.client_id') . ' = :client_id',
 				'EXISTS(' . $subQuery . ')'
 			])
 			->order([
 				$db->quoteName('client_id') . ' ASC',
 				$db->quoteName('template') . ' ASC',
 				$db->quoteName('modified_date') . ' ASC',
-			]);
+			])
+			->bind(':client_id', $client)
+		;
 
 		return $query;
 	}
