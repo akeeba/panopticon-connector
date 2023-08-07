@@ -40,6 +40,7 @@ class JsonapiView extends BaseJsonApiView
 		"changelogurl",
 		"updatesites",
 		"downloadkey",
+		"naughtyUpdates"
 	];
 
 	protected $fieldsToRenderItem = [

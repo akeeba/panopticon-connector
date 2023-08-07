@@ -20,6 +20,7 @@ use Joomla\CMS\Updater\Updater;
 use Joomla\Component\Installer\Administrator\Helper\InstallerHelper;
 use Joomla\Component\Installer\Administrator\Model\UpdateModel;
 use Joomla\Database\ParameterType;
+use Joomla\Utilities\ArrayHelper;
 use stdClass;
 
 class ExtensionsModel extends ListModel
@@ -43,16 +44,20 @@ class ExtensionsModel extends ListModel
 		$protected = $this->getState('filter.protected', 0);
 		$protected = ($protected !== '' && is_numeric($protected)) ? intval($protected) : null;
 
+		$updateRelevantEIDs = $this->getPossiblyNaughtExtensionIDs();
+
 		$db    = method_exists($this, 'getDatabase') ? $this->getDatabase() : $this->getDbo();
 		$query = $db->getQuery(true)
-			->select([
-				$db->quoteName('e.extension_id', 'id'),
-				$db->quoteName('e') . '.*',
-				$db->quoteName('u.version', 'new_version'),
-				$db->quoteName('u.detailsurl'),
-				$db->quoteName('u.infourl'),
-				$db->quoteName('u.changelogurl'),
-			])
+			->select(
+				[
+					$db->quoteName('e.extension_id', 'id'),
+					$db->quoteName('e') . '.*',
+					$db->quoteName('u.version', 'new_version'),
+					$db->quoteName('u.detailsurl'),
+					$db->quoteName('u.infourl'),
+					$db->quoteName('u.changelogurl'),
+				]
+			)
 			->from($db->quoteName('#__extensions', 'e'))
 			->join(
 				'LEFT OUTER',
@@ -61,14 +66,20 @@ class ExtensionsModel extends ListModel
 			)
 			->where(
 				[
-					$db->quoteName('e.package_id') . ' = 0',
 					'(' .
-						$db->quoteName('e.locked') . ' != 1 OR ' .
-						'(' . $db->quoteName('e.type') . ' = ' . $db->quote('file') . ' AND ' . $db->quoteName('e.element') . ' = ' . $db->quote('joomla') . ')'
-					. ')'
+					$db->quoteName('e.locked') . ' != 1 OR ' .
+					'(' . $db->quoteName('e.type') . ' = ' . $db->quote('file') . ' AND ' . $db->quoteName('e.element')
+					. ' = ' . $db->quote('joomla') . ')'
+					. ')',
+					'(' .
+					$db->quoteName('e.package_id') . ' = 0' .
+					' OR ' .
+					$db->quoteName('e.extension_id') . ' IN(' . implode(
+						',', ArrayHelper::toInteger($updateRelevantEIDs)
+					) . ')' .
+					')',
 				]
-			)
-			;
+			);
 
 		if (is_int($protected) && $protected >= 0)
 		{
@@ -103,16 +114,16 @@ class ExtensionsModel extends ListModel
 		{
 			/** @var UpdateModel $model */
 			$model = Factory::getApplication()
-							->bootComponent('com_installer')
-							->getMVCFactory()
-							->createModel('update', 'Administrator');
+				->bootComponent('com_installer')
+				->getMVCFactory()
+				->createModel('update', 'Administrator');
 
 			// Get the updates caching duration.
 			$params       = ComponentHelper::getComponent('com_installer')->getParams();
-			$cacheTimeout = 3600 * ((int)$params->get('cachetimeout', 6));
+			$cacheTimeout = 3600 * ((int) $params->get('cachetimeout', 6));
 
 			// Get the minimum stability.
-			$minimumStability = (int)$params->get('minimum_stability', Updater::STABILITY_STABLE);
+			$minimumStability = (int) $params->get('minimum_stability', Updater::STABILITY_STABLE);
 
 			// Purge the table before checking again.
 			$model->purge();
@@ -169,9 +180,13 @@ class ExtensionsModel extends ListModel
 		$items = array_map(
 			function (object $item) use ($jLang): object {
 				// Translate the client, extension type, and folder
-				$item->client_translated = Text::_([
-					0 => 'JSITE', 1 => 'JADMINISTRATOR', 3 => 'JAPI',
-				][$item->client_id] ?? 'JSITE');
+				$item->client_translated = Text::_(
+					[
+						0 => 'JSITE',
+						1 => 'JADMINISTRATOR',
+						3 => 'JAPI',
+					][$item->client_id] ?? 'JSITE'
+				);
 				$item->type_translated   = Text::_('COM_INSTALLER_TYPE_' . strtoupper($item->type));
 				$item->folder_translated = @$item->folder ? $item->folder : Text::_('COM_INSTALLER_TYPE_NONAPPLICABLE');
 
@@ -241,7 +256,7 @@ class ExtensionsModel extends ListModel
 
 		// Apply limits
 		$limitstart = $limitstart ?: 0;
-		$limit = $limit ?: 0;
+		$limit      = $limit ?: 0;
 
 		if ($limitstart !== 0 && $limit === 0)
 		{
@@ -253,29 +268,72 @@ class ExtensionsModel extends ListModel
 		}
 
 		// Add Update Site information for each extension
-		$updateSites = empty($items) ? [] : $this->getUpdateSitesForExtensions(
-			array_map(
-				function ($item) {
-					return $item->extension_id;
-				},
-				$items
+		$extensionIDs = array_unique(
+			array_merge(
+				array_map(
+					function ($item) {
+						return $item->extension_id;
+					},
+					$items
+				),
+				array_filter(
+					array_map(
+						function ($e) {
+							return $e->package_id;
+						},
+						$items
+					)
+				)
 			)
 		);
 
+		$updateSites       = empty($items) ? [] : $this->getUpdateSitesForExtensions($extensionIDs);
+		$naughtyExtensions = [];
+
 		$items = array_map(
-			function(object $item) use ($updateSites): object {
-				$item->updatesites = $updateSites[$item->extension_id] ?? [];
+			function (object $item) use ($updateSites, &$naughtyExtensions): object {
+				$ownUpdateSite     = $updateSites[$item->extension_id] ?? null;
+				$parentUpdateSite  = empty($item->package_id)
+					? []
+					: ($updateSites[$item->package_id] ?? []);
+				$item->updatesites = $ownUpdateSite ?? $parentUpdateSite;
+
+				if (empty($ownUpdateSite) && !empty($parentUpdateSite))
+				{
+					$naughtyExtensions[$item->package_id]   = 'parent';
+					$naughtyExtensions[$item->extension_id] = 'child';
+				}
 
 				// This is needed by InstallerHelper::getDownloadKey
 				$item->extra_query = array_reduce(
 					$item->updatesites,
-					function (string $carry, object $item) {
-						return $carry ?: $item->extra_query;
+					function (string $carry, object $updateSite) {
+						return $carry ?: $updateSite->extra_query;
 					},
 					''
 				);
 
-				$item->downloadkey = InstallerHelper::getDownloadKey(new CMSObject($item));
+				$item->downloadkey = $ownUpdateSite
+					? InstallerHelper::getDownloadKey(new CMSObject($item))
+					: (
+						$parentUpdateSite
+							? InstallerHelper::getDownloadKey(new CMSObject($this->getParentPackageExtension($item)))
+							: (object) [
+							'supported' => false,
+							'valid'     => false,
+						]
+					);
+
+				return $item;
+			},
+			$items
+		);
+
+		// Mark items as naughty or nice
+		$items = array_map(
+			function ($item) use ($naughtyExtensions)
+			{
+				$item->naughtyUpdates = $naughtyExtensions[$item->id] ?? null;
 
 				return $item;
 			},
@@ -308,13 +366,13 @@ class ExtensionsModel extends ListModel
 		}
 
 		$updateSitesPerEid = [];
-		$updateSiteIDs = [];
+		$updateSiteIDs     = [];
 
 		foreach ($temp as $item)
 		{
-			$updateSitesPerEid[$item->extension_id] = $updateSitesPerEid[$item->extension_id] ?? [];
+			$updateSitesPerEid[$item->extension_id]   = $updateSitesPerEid[$item->extension_id] ?? [];
 			$updateSitesPerEid[$item->extension_id][] = $item->update_site_id;
-			$updateSiteIDs[] = $item->update_site_id;
+			$updateSiteIDs[]                          = $item->update_site_id;
 		}
 
 		$query = $db->getQuery(true)
@@ -348,5 +406,111 @@ class ExtensionsModel extends ListModel
 		$ret = array_filter($ret);
 
 		return $ret;
+	}
+
+	/**
+	 * Returns all extension IDs which receive updates, even though they might not have an update site.
+	 *
+	 * Some updates have an asinine —not to put too fine a point on it— way of (ab)using Joomla's extensions update
+	 * system. Let's take "What? Nothing!" as an example (sorry, Peter!).
+	 *
+	 * You download a package extension which consists of two extensions: a library extension and a plugin extension.
+	 * It creates an update site for the package extension. However, the contents of the update site (the XML
+	 * downloaded) says it's an update for the **plugin** extension (which does not have an update site in Joomla!, and
+	 * is a sub-extension of the package, therefore it should not be receiving updates on its own). And yet, the update
+	 * ZIP package you download is a **package** extension.
+	 *
+	 * The thing is, since the XML of the update site tells Joomla that a _plugin_ update is available, Joomla reports
+	 * that an extension to the _plugin_ is available, even though it will eventually install a package update (it
+	 * cannot know that at this point).
+	 *
+	 * Quite the clusterfuck.
+	 *
+	 * This is problematic for many reasons.
+	 *
+	 * First of all, Joomla! will create a _plugin_ installation adapter to install the update ZIP file, even though the
+	 * update ZIp file is in fact a package update. This seems to be half-fixed on Joomla 4 so, okay, it won't break
+	 * stuff very badly.
+	 *
+	 * The second problem is that the Joomla! Update Pre-Update Check will **ALWAYS** report the **PACKAGE** extension
+	 * as incompatible with the next version of Joomla because the package extension does not have any update
+	 * information. Remember, the update site's XML data claims that only the plugin receives updates but since the
+	 * plugin is a sub-extension of the package it's not listed separately. Therefore, the clients of this extensions
+	 * developer will always be told a lie and will grow not to trust the pre-update check.
+	 *
+	 * The final problem is that we normally cannot know that the **PLUGIN** shows as the target of available updates
+	 * as it does not have an update site attached to it AND it's part of a package.
+	 *
+	 * The first two problems are the 3PD's problems. Not our monkey, not our circus.
+	 *
+	 * The third problem, though, becomes our problem as we cannot display the available update, therefore we cannot do
+	 * automatic updates. As a result we need to exploit Joomla's idiotic way of handling updates in the database to get
+	 * the extension IDs of these problematic extensions just so we can include them in the list of extensions which can
+	 * receive updates.
+	 *
+	 * The solution is pretty much part of the Dark Arts of Joomla! Core. DO NOT TRY THIS AT HOME. RISK OF SERIOUS BRAIN
+	 * INJURY OR DEATH.
+	 *
+	 * @return  array
+	 * @since   1.0.0
+	 */
+	private function getPossiblyNaughtExtensionIDs(): array
+	{
+		$db    = method_exists($this, 'getDatabase') ? $this->getDatabase() : $this->getDbo();
+		$query = $db->getQuery(true)
+			->select(
+				'DISTINCT ' . $db->quoteName('use.update_site_id')
+			)
+			->from($db->quoteName('#__updates', 'u'))
+			->innerJoin(
+				$db->quoteName('#__update_sites_extensions', 'use'),
+				// `use`.update_site_id = u.update_site_id
+				$db->quoteName('use.update_site_id') . ' = ' . $db->quoteName('u.update_site_id')
+			);
+
+		$query2 = $db->getQuery(true)
+			->select(
+				'DISTINCT ' . $db->quoteName('e.extension_id')
+			)
+			->from($db->quoteName('#__updates', 'u'))
+			->innerJoin(
+				$db->quoteName('#__extensions', 'e'),
+				// e.element = u.element and e.type = u.type and e.folder = u.folder and e.client_id = u.client_id
+				$db->quoteName('e.element') . ' = ' . $db->quoteName('u.element') .
+				' AND ' .
+				$db->quoteName('e.type') . ' = ' . $db->quoteName('u.type') .
+				' AND ' .
+				$db->quoteName('e.folder') . ' = ' . $db->quoteName('u.folder') .
+				' AND ' .
+				$db->quoteName('e.client_id') . ' = ' . $db->quoteName('u.client_id')
+			);
+
+		$query->union($query2);
+
+		return $db->setQuery($query)->loadColumn() ?: [];
+	}
+
+	private function getParentPackageExtension(object $item): ?object
+	{
+		$pid = $item->package_id;
+
+		if (empty($pid))
+		{
+			return null;
+		}
+
+		if (isset($this->cacheForPackageExtensions[$pid]))
+		{
+			return $this->cacheForPackageExtensions[$pid];
+		}
+
+		$db    = method_exists($this, 'getDatabase') ? $this->getDatabase() : $this->getDbo();
+		$query = $db->getQuery(true)
+			->select('*')
+			->from($db->quoteName('#__extensions'))
+			->where($db->quoteName('extension_id') . ' = :pid')
+			->bind(':pid', $pid);
+
+		return $db->setQuery($query)->loadObject() ?? null;
 	}
 }
