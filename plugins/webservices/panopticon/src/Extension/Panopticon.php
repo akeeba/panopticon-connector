@@ -32,7 +32,7 @@ class Panopticon extends CMSPlugin implements SubscriberInterface
 	public function registerRoutes(Event $event): void
 	{
 		/** @var ApiRouter $router */
-		[$router] = $event->getArguments();
+		[$router] = array_values($event->getArguments());
 
 		$defaults = [
 			'component' => 'com_panopticon',
