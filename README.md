@@ -1,6 +1,6 @@
-# Akeeba Panopticon Connector
+# Akeeba Panopticon Connector for Joomla! 4 and Joomla! 5
 
-Allows you to connect Joomla 4.0 and later sites to [Akeeba Panopticon](https://github.com/akeeba/panopticon).
+Allows you to connect Joomla 4.x and 5.x sites to [Akeeba Panopticon](https://github.com/akeeba/panopticon).
 
 ## Requirements
 
@@ -11,18 +11,12 @@ Allows you to connect Joomla 4.0 and later sites to [Akeeba Panopticon](https://
 
 ## License
 
-Akeeba Panopticon Connector for Joomla! 3
+Akeeba Panopticon Connector for Joomla! 4 and Joomla! 5
+
 Copyright (C) 2023  Nikolaos Dionysopoulos / Akeeba Ltd
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
 
-You should have received a copy of the [GNU Affero General Public License](LICENSE.txt)
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+You should have received a copy of the [GNU Affero General Public License](LICENSE.txt) along with this program.  If not, see <https://www.gnu.org/licenses/>.

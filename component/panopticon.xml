@@ -9,12 +9,12 @@
 <extension type="component" method="upgrade">
     <name>com_panopticon</name>
     <author>Akeeba Ltd</author>
-    <creationDate>2023-04-07</creationDate>
+    <creationDate>2023-10-19</creationDate>
     <copyright>(C) 2023-2023 Nicholas K. Dionysopoulos / Akeeba Ltd</copyright>
     <license>GNU General Public License version 3 or later; see LICENSE.txt</license>
     <authorEmail>no-reply@akeeba.com</authorEmail>
     <authorUrl>www.akeeba.com</authorUrl>
-    <version>0.0.0</version>
+    <version>1.0.0</version>
     <description>COM_PANOPTICON_XML_DESCRIPTION</description>
     <namespace path="src">Akeeba\Component\Panopticon</namespace>
 

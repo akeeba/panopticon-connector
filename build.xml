@@ -56,7 +56,7 @@
     ====================================================================================================
     -->
     <target name="git" description="Makes only packages, not the documentation"
-            depends="new-release,setup-properties,component-packages">
+            depends="new-release,setup-properties,component-packages,update_xml">
     </target>
 
     <target name="new-release" depends="composer-install,link">
@@ -90,6 +90,60 @@
             </replacetokens>
         </filterchain>
 
+    </target>
+
+    <!--
+    ====================================================================================================
+    Tasks - Updates
+    ====================================================================================================
+    -->
+    <target name="update_xml">
+        <if>
+            <not>
+                <contains string="${version}" substring="-dev" />
+            </not>
+            <then>
+                <!-- Package name: pkg_something-1.2.3.zip -->
+                <property name="build.package_name" value="pkg_${build.package_base_name}-${version}.zip" />
+
+                <!-- Generate the file hashes -->
+                <filehash file="${dirs.release}/${build.package_name}" algorithm="md5" propertyname="buildhash.md5" />
+                <filehash file="${dirs.release}/${build.package_name}" algorithm="sha1" propertyname="buildhash.sha1" />
+                <filehash file="${dirs.release}/${build.package_name}" algorithm="sha256" propertyname="buildhash.sha256" />
+                <filehash file="${dirs.release}/${build.package_name}" algorithm="sha384" propertyname="buildhash.sha384" />
+                <filehash file="${dirs.release}/${build.package_name}" algorithm="sha512" propertyname="buildhash.sha512" />
+
+                <!-- Create the XML representation of the current version's update information -->
+                <loadfile file="${dirs.templates}/update.xml" property="update.current">
+                    <filterchain id="updatefile-tokens">
+                        <replacetokens begintoken="##" endtoken="##">
+                            <token key="DATE" value="${build.date}" />
+                            <token key="VERSION" value="${version}" />
+                            <token key="HASH_MD5" value="${buildhash.md5}" />
+                            <token key="HASH_SHA1" value="${buildhash.sha1}" />
+                            <token key="HASH_SHA256" value="${buildhash.sha256}" />
+                            <token key="HASH_SHA384" value="${buildhash.sha384}" />
+                            <token key="HASH_SHA512" value="${buildhash.sha512}" />
+                        </replacetokens>
+                    </filterchain>
+                </loadfile>
+
+                <!-- Add the current version as the first update item -->
+                <loadfile file="${dirs.root}/updates/pkg_panopticon.xml" property="update.all">
+                    <filterchain>
+                        <replaceregexp>
+                            <regexp pattern="&lt;updates&gt;" replace="&lt;updates&gt;${update.current}" ignoreCase="false" />
+                        </replaceregexp>
+                    </filterchain>
+                </loadfile>
+
+                <!-- Remove duplicates and save the mostly minified file to the repo -->
+                <xmlupdate xml="${update.all}" tofile="${dirs.root}/updates/pkg_panopticon.xml" />
+
+                <!-- Upload the update XML file to S3 as well -->
+                <exec command="s3cmd put ${dirs.root}/updates/pkg_panopticon.xml s3://${s3.bucket}/updates/pkg_panopticon.xml --acl-public --add-header='Cache-Control:max-age=300'" passthru="true"/>
+            </then>
+        </if>
     </target>
 
     <!--
