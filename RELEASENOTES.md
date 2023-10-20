@@ -15,13 +15,13 @@ While the connector supports a wide range of Joomla! and PHP versions, each vers
 
 Akeeba Panopticon Connector uses the Joomla! API application (the `/api` folder on your site). Around February 2023 there was a lot of unnecessary panic, leading some people to disable access to this folder through their `.htaccess` file. If you did that, you need to undo that change to re-enable access to the `/api` folder.
 
-When Akeeba Panopticon connects on sites running on Joomla! 4 and later it makes use of code provided not only by its own connector, but also core Joomla! plugins in the `webservices` and `api-authentication` folders. Please make sure that the following plugins are enabled on your site:
+When Akeeba Panopticon connects to sites running on Joomla! 4 and later it makes use of code provided not only by its own connector, but also core Joomla! plugins in the `webservices` and `api-authentication` folders. Please make sure that the following plugins are enabled on your site:
 
 * `Web Services - Panopticon` (provided by this connector).
 * `Web Services - Installer` (provided by Joomla!).
 * `API Authentication - Web Services Joomla Token` (required for secure, token-based authentication to the Joomla! API).
 
-If any of these plugins is disabled, _or if its Access is set to anything other than Public_, you will run into connection problems with your site. The connector itself will try to detect and report these issues, but there are cases it might fail to identify the problem.
+If any of these plugins are disabled, _or if its Access is set to anything other than Public_, you will run into connection problems with your site. The connector itself will try to detect and report these issues, but there are cases it might fail to identify the problem.
 
 ## New in this version
 
