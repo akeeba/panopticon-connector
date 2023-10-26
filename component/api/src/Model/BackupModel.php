@@ -432,7 +432,7 @@ class BackupModel extends BaseModel
 	{
 		/** @var DatabaseDriver $db */
 		$db    = Factory::getContainer()->get('DatabaseDriver');
-		$query = $db->getQuery()
+		$query = $db->getQuery(true)
 			->select($db->quoteName('manifest_cache'))
 			->from($db->quoteName('#__extensions'))
 			->where(
