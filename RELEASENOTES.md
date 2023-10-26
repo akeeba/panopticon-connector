@@ -25,4 +25,4 @@ If any of these plugins are disabled, _or if its Access is set to anything other
 
 ## New in this version
 
-**🎉 Initial release**
+* Fix: Linking Panopticon to Akeeba Backup may fail if the JSON API isn't already active
