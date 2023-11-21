@@ -256,27 +256,27 @@ class ServerInfo
 				continue;
 			}
 
-			if (str_contains($parts, 'year'))
+			if (str_contains($part, 'year'))
 			{
 				$multiplier = 365.25 * 24 * 60;
 			}
-			elseif (str_contains($parts, 'month'))
+			elseif (str_contains($part, 'month'))
 			{
 				$multiplier = 30.4375 * 24 * 60;
 			}
-			elseif (str_contains($parts, 'week'))
+			elseif (str_contains($part, 'week'))
 			{
 				$multiplier = 7 * 24 * 60;
 			}
-			elseif (str_contains($parts, 'day'))
+			elseif (str_contains($part, 'day'))
 			{
 				$multiplier = 24 * 60;
 			}
-			elseif (str_contains($parts, 'hour'))
+			elseif (str_contains($part, 'hour'))
 			{
 				$multiplier = 60;
 			}
-			elseif (str_contains($parts, 'minute'))
+			elseif (str_contains($part, 'minute'))
 			{
 				$multiplier = 1;
 			}
