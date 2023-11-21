@@ -207,11 +207,19 @@ class ServerInfo
 		// Samples:
 		// 17:39:11 up  3:43,  6 users,  load average: 0.18, 0.22, 0.35
 		// 15:40:51 up 33 days, 22:04,  1 user,  load average: 3.05, 2.44, 2.37
+		// 15:40:51 up 1 day,  1:40,  2 users,  load average: 3.13, 1.77, 1.45
 
 		// Get the uptime in minutes
 		$line = trim($output[0]);
 		[, $uptime] = explode(' up ', $line);
-		[$uptime,] = explode(',  ', $uptime ?? '');
+		if (preg_match('#(.*),\s+\d+\s+user#U', $uptime, $matches))
+		{
+			$uptime = $matches[1];
+		}
+		else
+		{
+			[$uptime,] = explode(',  ', $uptime ?? '');
+		}
 		$uptime = $this->uptimeToMinutes($uptime ?? '');
 
 		// Get the load average (for the last 1, 5, and 15 minutes)
@@ -251,7 +259,7 @@ class ServerInfo
 			if (str_contains($part, ':'))
 			{
 				[$hours, $minutes] = explode(':', $part);
-				$total = intval($hours) * 60 + intval($minutes);
+				$total += intval($hours) * 60 + intval($minutes);
 
 				continue;
 			}
