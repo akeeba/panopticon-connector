@@ -9,6 +9,7 @@ namespace Akeeba\Component\Panopticon\Api\Model;
 
 defined('_JEXEC') || die;
 
+use Akeeba\Component\Panopticon\Api\Library\ServerInfo;
 use Exception;
 use Joomla\CMS\Cache\CacheControllerFactoryInterface;
 use Joomla\CMS\Component\ComponentHelper;
@@ -95,6 +96,7 @@ class CoreModel extends UpdateModel
 				'api'     => $apiLevel,
 			],
 			'admintools'          => $this->getAdminToolsInformation(),
+			'serverInfo'          => (new ServerInfo($this->getDatabase()))(),
 		];
 
 		// Get the file_joomla pseudo-extension's ID
@@ -696,8 +698,8 @@ ENDDATA;
 			{
 				$response = $http->get(
 					$url, [
-					'Range' => sprintf('bytes=%d-%d', $from, $to),
-				]
+						'Range' => sprintf('bytes=%d-%d', $from, $to),
+					]
 				);
 
 				if ($response->code != 200 && $response->code != 206)
@@ -1217,12 +1219,12 @@ ENDDATA;
 
 	private function getNumberOfTemplateOverridesChanged(): int
 	{
-		$db    = method_exists($this, 'getDatabase') ? $this->getDatabase() : $this->getDbo();
+		$db       = method_exists($this, 'getDatabase') ? $this->getDatabase() : $this->getDbo();
 		$subQuery = $db->getQuery(true)
 			->select('1')
 			->from($db->quoteName('#__extensions', 'e'))
 			->where($db->quoteName('e.extension_id') . ' = ' . $db->quoteName('o.extension_id'));
-		$query = $db->getQuery(true)
+		$query    = $db->getQuery(true)
 			->select('COUNT(*)')
 			->from($db->quoteName('#__template_overrides', 'o'))
 			->where(

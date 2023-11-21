@@ -41,7 +41,8 @@ class JsonapiView extends BaseJsonApiView
 				'phpVersion',
 				'overridesChanged',
 				'panopticon',
-				'admintools'
+				'admintools',
+				'serverInfo'
 			];
 		}
 
