@@ -22,6 +22,7 @@ use Joomla\Component\Installer\Administrator\Model\UpdateModel;
 use Joomla\Database\ParameterType;
 use Joomla\Utilities\ArrayHelper;
 use stdClass;
+use Throwable;
 
 class ExtensionsModel extends ListModel
 {
@@ -37,6 +38,73 @@ class ExtensionsModel extends ListModel
 		];
 
 		parent::__construct($config, $factory);
+	}
+
+	/**
+	 * Asks Joomla!™ to refresh its extension updates cache, if necessary.
+	 *
+	 * @param   bool         $forceReload   Should I force-reload **all** updates?
+	 * @param   int|null     $cacheTimeout  Cache timeout in hours, NULL for configured default
+	 * @param   string|null  $minStability  Minimum stability, NULL for configured default
+	 *
+	 * @return  void
+	 * @since   1.0.2
+	 */
+	public function refreshUpdateInformation(
+		bool $forceReload = false, ?int $cacheTimeout = null, ?string $minStability = null
+	): void
+	{
+		// Get the updates caching duration and minimum stability
+		$params       = ComponentHelper::getComponent('com_installer')->getParams();
+		$cacheTimeout = $cacheTimeout ?? 3600 * ((int) $params->get('cachetimeout', 6));
+		$minStability = $minStability ?? (int) $params->get('minimum_stability', Updater::STABILITY_STABLE);
+
+		// Make sure the parameters have values and that they are within bounds.
+		$cacheTimeout = (int) ($cacheTimeout ?: 6);
+		$minStability = (int) ($minStability ?: Updater::STABILITY_STABLE);
+
+		if ($cacheTimeout <= 0)
+		{
+			$cacheTimeout = 1;
+		}
+		elseif ($cacheTimeout >= 24)
+		{
+			$cacheTimeout = 24;
+		}
+
+		if (!in_array($minStability, [
+			Updater::STABILITY_DEV, Updater::STABILITY_ALPHA, Updater::STABILITY_BETA, Updater::STABILITY_RC,
+			Updater::STABILITY_STABLE
+		])) {
+			$minStability = Updater::STABILITY_STABLE;
+		}
+
+		// Force-reload the update before listing extensions, if asked to do so.
+		if ($forceReload)
+		{
+			try
+			{
+				Factory::getApplication()
+					->bootComponent('com_installer')
+					->getMVCFactory()
+					->createModel('update', 'Administrator')
+					->purge();
+			}
+			catch (Throwable $e)
+			{
+				// Ignore any internal / database errors here.
+			}
+		}
+
+		// Ask Joomla! to refresh its update information.
+		try
+		{
+			Updater::getInstance()->findUpdates(0, $cacheTimeout, $minStability);
+		}
+		catch (Throwable $e)
+		{
+			// Just in case…
+		}
 	}
 
 	protected function getListQuery()
@@ -109,27 +177,10 @@ class ExtensionsModel extends ListModel
 
 	protected function _getList($query, $limitstart = 0, $limit = 0)
 	{
-		// Force-reload the update before listing extensions?
-		if ($this->getState('filter.force', false))
-		{
-			/** @var UpdateModel $model */
-			$model = Factory::getApplication()
-				->bootComponent('com_installer')
-				->getMVCFactory()
-				->createModel('update', 'Administrator');
-
-			// Get the updates caching duration.
-			$params       = ComponentHelper::getComponent('com_installer')->getParams();
-			$cacheTimeout = 3600 * ((int) $params->get('cachetimeout', 6));
-
-			// Get the minimum stability.
-			$minimumStability = (int) $params->get('minimum_stability', Updater::STABILITY_STABLE);
-
-			// Purge the table before checking again.
-			$model->purge();
-
-			$model->findUpdates(0, $cacheTimeout, $minimumStability);
-		}
+		// Tell Joomla! to retrieve updates (with optional force-updating)
+		$this->refreshUpdateInformation(
+			$this->getState('filter.force', false), $this->getState('filter.timeout', null)
+		);
 
 		// Get all items from the database. We deliberately don't apply any limits just yet.
 		$items = parent::_getList($query);
@@ -316,12 +367,12 @@ class ExtensionsModel extends ListModel
 				$item->downloadkey = $ownUpdateSite
 					? InstallerHelper::getDownloadKey(new CMSObject($item))
 					: (
-						$parentUpdateSite
-							? InstallerHelper::getDownloadKey(new CMSObject($this->getParentPackageExtension($item)))
-							: (object) [
-							'supported' => false,
-							'valid'     => false,
-						]
+					$parentUpdateSite
+						? InstallerHelper::getDownloadKey(new CMSObject($this->getParentPackageExtension($item)))
+						: (object) [
+						'supported' => false,
+						'valid'     => false,
+					]
 					);
 
 				return $item;
@@ -331,8 +382,7 @@ class ExtensionsModel extends ListModel
 
 		// Mark items as naughty or nice
 		$items = array_map(
-			function ($item) use ($naughtyExtensions)
-			{
+			function ($item) use ($naughtyExtensions) {
 				$item->naughtyUpdates = $naughtyExtensions[$item->id] ?? null;
 
 				return $item;

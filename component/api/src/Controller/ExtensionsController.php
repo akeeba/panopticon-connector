@@ -25,7 +25,8 @@ class ExtensionsController extends ApiController
 			         'updatable',
 			         'protected',
 			         'core',
-					 'force'
+					 'force',
+					 'timeout',
 		         ] as $key)
 		{
 			$value = $this->input->get->get($key, null);

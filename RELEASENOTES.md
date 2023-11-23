@@ -27,9 +27,8 @@ If any of these plugins are disabled, _or if its Access is set to anything other
 
 ## 📋 CHANGELOG
 
-* 🐞 Linking Panopticon to Akeeba Backup may fail if the JSON API isn't already active
-* 🐞 The `version.php` file is not copied over during installation / update
-
+* ✨ Collect server information.
+* ✏️ Tell Joomla! to refresh its updates cache when requesting update information.
 
 Legend:
 * 🚨 Security update
