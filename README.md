@@ -5,7 +5,7 @@ Allows you to connect Joomla 4.x and 5.x sites to [Akeeba Panopticon](https://gi
 ## Requirements
 
 * Joomla 4.0, 4.1, 4.2, 4.3, 4.4, or 5.0
-* PHP 7.2, 7.3, 7.4, 8.0, 8.1, or 8.2
+* PHP 7.2, 7.3, 7.4, 8.0, 8.1, 8.2, or 8.3
 * (Optional) Akeeba Backup Professional 9.x — to enable backup features
 * (Optional) Admin Tools Professional 7.x — to enable security features
 
