@@ -910,11 +910,11 @@ class ServerInfo
 				break;
 
 			case 'macOS':
-				$cmd = 'sysctl machdep.cpu.brand_string';
+				$cmd = '/usr/sbin/sysctl machdep.cpu.brand_string';
 				break;
 
 			case 'BSD':
-				$cmd = 'sysctl hw.model';
+				$cmd = '/usr/sbin/sysctl hw.model';
 				break;
 
 			default:
