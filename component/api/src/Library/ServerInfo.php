@@ -223,14 +223,34 @@ class ServerInfo
 		$uptime = $this->uptimeToMinutes($uptime ?? '');
 
 		// Get the load average (for the last 1, 5, and 15 minutes)
-		[, $temp] = explode('load average:', $line);
+		$parts = explode('load average:', $line);
+
+		if (count($parts) < 2)
+		{
+			$parts = explode('load averages:', $line);
+		}
+
+		if (count($parts) < 2)
+		{
+			return null;
+		}
+
+		$temp = $parts[1];
 
 		if (empty($temp))
 		{
 			return null;
 		}
 
-		[$load1, $load5, $load15] = explode(',', trim($temp));
+		$temp = preg_replace('#\s+#', ',', trim($temp));
+		$parts = explode(',', $temp);
+
+		if (count($parts) < 3)
+		{
+			return null;
+		}
+
+		[$load1, $load5, $load15] = $parts;
 
 		return [
 			'uptime' => $uptime,
@@ -496,7 +516,7 @@ class ServerInfo
 			}
 
 			// Extract the page size
-			[, $temp] = explode($line, 'with a page size of');
+			[, $temp] = explode('with a page size of', $line);
 			$temp     = trim($temp, ' ).');
 			$pageSize = intval($temp);
 
