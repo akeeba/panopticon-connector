@@ -24,6 +24,7 @@
         <file type="component" id="com_panopticon">com_panopticon.zip</file>
 
         <file type="plugin" group="webservices" id="panopticon">plg_webservices_panopticon.zip</file>
+        <file type="plugin" group="console" id="panopticon">plg_console_panopticon.zip</file>
     </files>
 
     <languages folder="language">

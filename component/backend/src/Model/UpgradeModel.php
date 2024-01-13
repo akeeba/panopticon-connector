@@ -93,6 +93,7 @@ class UpgradeModel extends BaseDatabaseModel
 	/** @var string[] Included extensions to automatically publish on NEW INSTALLATION OR UPGRADE */
 	private const ALWAYS_ENABLE_EXTENSIONS = [
 		'plg_webservices_panopticon',
+		'plg_console_panopticon',
 	];
 
 	/** @var string[] Extensions to always uninstall if they are still installed (runs on install and upgrade) */
