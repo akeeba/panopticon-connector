@@ -1,6 +1,7 @@
 # Akeeba Panopticon Connector for Joomla 4.x and 5.x version 1.0.3
 
 * ✨ Console plugin for CLI commands
+* 🐞 Chunked downloads were failing, in a way that was stalling the core update
 
 # Akeeba Panopticon Connector for Joomla 4.x and 5.x version 1.0.2
 

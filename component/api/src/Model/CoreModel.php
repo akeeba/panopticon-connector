@@ -33,6 +33,8 @@ use Throwable;
 
 class CoreModel extends UpdateModel
 {
+	private const DEBUG_CHUNKED_DOWNLOAD = false;
+
 	private $coreExtensionID = null;
 
 	private $coreUpdateSiteIDs = null;
@@ -644,7 +646,7 @@ ENDDATA;
 				}
 			}
 
-			$fp = @fopen($outFile, 'wb');
+			$fp = @fopen($outFile, 'ab');
 
 			if ($fp === false)
 			{
@@ -652,18 +654,15 @@ ENDDATA;
 			}
 
 			// If there's an offset make sure the file size isn't beyond that offset and get ready to append data.
-			if ($offset > 0)
-			{
-				@ftruncate($fp, $offset);
-				@fseek($fp, $offset);
-			}
+			@ftruncate($fp, max($offset, 0));
+			@fseek($fp, max($offset, 0));
 
 		}
 		catch (Exception $e)
 		{
 			$result['error'] = $e->getMessage();
 
-			if ($fp !== false)
+			if ($fp !== false && $fp !== null)
 			{
 				@fclose($fp);
 			}
@@ -674,6 +673,8 @@ ENDDATA;
 		// Indicate download is not done
 		$result['done'] = false;
 
+		$debug = [];
+
 		// Start downloading chunks while we have some time
 		while ($totalElapsed < $maxTime)
 		{
@@ -681,7 +682,7 @@ ENDDATA;
 
 			// Calculate the current start / end byte
 			$from = max(0, $offset + 1);
-			$to   = max($from + $chunkSize - 1, $size - 1);
+			$to   = min($from + $chunkSize, $size);
 
 			// If the start byte is beyond the content-length we read from the HEAD: break
 			if ($from > $size)
@@ -762,17 +763,61 @@ ENDDATA;
 			$totalElapsed      = $endTime - $totalStart;
 			$projectedNextTime = $timeElapsed;
 
-			if ($timeElapsed < 2.0)
+			$debugEntry = [
+				'from'       => $from,
+				'to'         => $to,
+				'elapsed'    => $timeElapsed,
+				'chunkSize'  => $chunkSize,
+				'chunkIndex' => $chunkIndex,
+				'decision'   => 'hold',
+			];
+
+			if ($timeElapsed < 2.0 && $chunkIndex >= count($chunkSizes) - 1)
 			{
-				// The download was too fast. Increase the chunk size.
-				$chunkIndex        = min(count($chunkSizes) - 1, $chunkIndex + 1);
-				$projectedNextTime = 2.0 * $projectedNextTime;
+				// We are using the maximum chunk size, but it's still too fast. Slow down to prevent CloudFlare blocking us.
+				$sleepTime = 2.0 - $timeElapsed;
+
+				if (function_exists('usleep'))
+				{
+					try
+					{
+						usleep($timeElapsed * 1000000);
+					}
+					catch (Throwable $e)
+					{
+						// Ignore.
+					}
+				}
+
+				$debugEntry['decision']      = 'sleep';
+				$debugEntry['sleepTime']     = $sleepTime;
+			}
+			elseif ($timeElapsed < 2.0)
+			{
+				// Try to increase the chunk size so that the next chunk takes around 2 to 4 seconds to complete.
+				$addFactor         = max(1, ceil(sqrt(2.0 / $timeElapsed)));
+				$chunkIndex        = ($addFactor + $chunkIndex) >= count($chunkSizes)
+					? (count($chunkSizes) - 1)
+					: ($addFactor + $chunkIndex);
+				$projectedNextTime = pow(2.0, $addFactor) * $timeElapsed;
+
+				$debugEntry['decision']      = 'increase';
+				$debugEntry['addFactor']     = $addFactor;
+				$debugEntry['projectedTime'] = $projectedNextTime;
 			}
 			elseif ($timeElapsed > 4.0)
 			{
-				// The download was too slow. Decrease the chunk size.
+				// The download was too slow. Halve the chunk size.
 				$chunkIndex        = max(0, $chunkIndex - 1);
 				$projectedNextTime = $projectedNextTime / 2.0;
+
+				$debugEntry['decision']      = 'decrease';
+				$debugEntry['projectedTime'] = $projectedNextTime;
+			}
+
+			if (self::DEBUG_CHUNKED_DOWNLOAD)
+			{
+				$debug[] = $debugEntry;
 			}
 
 			// Update the return array's `chunk_index`
@@ -786,6 +831,11 @@ ENDDATA;
 		}
 
 		@fclose($fp);
+
+		if (self::DEBUG_CHUNKED_DOWNLOAD)
+		{
+			$result['debug'] = $debug;
+		}
 
 		return $result;
 	}
