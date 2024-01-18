@@ -87,7 +87,7 @@ class GetToken extends AbstractCommand implements DatabaseAwareInterface
 
 		// Make sure the Joomla! token us enabled for the user, and a non-empty token seed available.
 		$tokenSeed    = $this->getUserProfileValue($user, 'joomlatoken.token');
-		$tokenEnabled = $this->getUserProfileValue($user, 'joomlatoken.enabled', 1);
+		$tokenEnabled = $this->getUserProfileValue($user, 'joomlatoken.enabled', 0);
 
 		if (!$tokenEnabled)
 		{
