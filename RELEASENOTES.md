@@ -27,8 +27,8 @@ If any of these plugins are disabled, _or if its Access is set to anything other
 
 ## 📋 CHANGELOG
 
-* ✨ Collect server information.
-* ✏️ Tell Joomla! to refresh its updates cache when requesting update information.
+* ✨ Console plugin for CLI commands
+* 🐞 Chunked downloads were failing, in a way that was stalling the core update
 
 Legend:
 * 🚨 Security update
