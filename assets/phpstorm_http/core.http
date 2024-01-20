@@ -73,6 +73,13 @@ Content-Type: application/x-www-form-urlencoded
 
 basename=Joomla_4.3.0-Stable-Update_Package.zip
 
+### Joomla! Update finalisation
+POST {{endpoint}}/../administrator/components/com_joomlaupdate/extract.php
+User-Agent: FooBar/1.0
+Content-Type: application/x-www-form-urlencoded
+
+task=finalizeUpdate&password=QxU7toNjaTlJg8fl1sZUMMP06hxaYNWV
+
 ### Post-update code
 POST {{endpoint}}/v1/panopticon/core/update/postupdate
 Authorization: Bearer {{api_token}}
