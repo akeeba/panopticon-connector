@@ -842,6 +842,28 @@ ENDDATA;
 
 	private function getURLForChunkedDownloads(): ?string
 	{
+		// Joomla! 5.1.0 and later uses TUF, therefore we have to go through the model and hope for the best
+		if (version_compare(JVERSION, '5.0.999999', 'gt'))
+		{
+			$updateInfo = $this->getUpdateInformation();
+
+			if (!is_array($updateInfo) || !isset($updateInfo['object'])
+			    || !is_object($updateInfo['object'])
+			    || !isset($updateInfo['object']->downloadurl)
+			    || !is_object($updateInfo['object']->downloadurl)
+			    || !isset($updateInfo['object']->downloadurl->_data))
+			{
+				return null;
+			}
+
+			return $updateInfo['object']->downloadurl->_data;
+		}
+
+		/**
+		 * On Joomla! 4.0 through 5.0 we implement our own thing which reads the XML update file, extracts the download
+		 * URLs, removes the GitHub URL, and returns the first URL remaining which is the CDN URL.
+		 */
+
 		// Fetch the update information from the database.
 		$id    = ExtensionHelper::getExtensionRecord('joomla', 'file')->extension_id;
 		$db    = version_compare(JVERSION, '4.2.0', 'lt') ? $this->getDbo() : $this->getDatabase();

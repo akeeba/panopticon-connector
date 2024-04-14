@@ -1,3 +1,7 @@
+# Akeeba Panopticon Connector for Joomla 4.x and 5.x version 1.0.4
+
+* ✨ Support for TUF (The Update Framework) in Joomla! 5.1 for Joomla! itself
+
 # Akeeba Panopticon Connector for Joomla 4.x and 5.x version 1.0.3
 
 * ✨ Console plugin for CLI commands

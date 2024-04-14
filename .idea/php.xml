@@ -19,6 +19,8 @@
       <path value="$USER_HOME$/Sites/boot4" />
       <path value="/var/www/boot4" />
       <path value="$PROJECT_DIR$/../../master/joomla4" />
+      <path value="$PROJECT_DIR$/../../master/joomla5" />
+      <path value="$PROJECT_DIR$/../../../Sites/boot5/configuration.php" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="7.2">
