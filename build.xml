@@ -66,7 +66,9 @@
         <mkdir dir="${dirs.release}"/>
 
         <echo>Removing .DS_Store files</echo>
-        <exec command="sh killDS.sh" dir="${dirs.root}"/>
+        <exec executable="sh" dir="${dirs.root}">
+            <arg value="killDS.sh" />
+        </exec>
     </target>
 
     <target name="setup-properties" description="Set up version and build properties">
@@ -142,7 +144,13 @@
                 <xmlupdate xml="${update.all}" tofile="${dirs.root}/updates/pkg_panopticon.xml" />
 
                 <!-- Upload the update XML file to S3 as well -->
-                <exec command="s3cmd put ${dirs.root}/updates/pkg_panopticon.xml s3://${s3.bucket}/updates/pkg_panopticon.xml --acl-public --add-header='Cache-Control:max-age=300'" passthru="true"/>
+                <exec executable="s3cmd" passthru="true">
+                    <arg value="put" />
+                    <arg value="${dirs.root}/updates/pkg_panopticon.xml" />
+                    <arg value="s3://${s3.bucket}/updates/pkg_panopticon.xml" />
+                    <arg value="--acl-public" />
+                    <arg value="--add-header='Cache-Control:max-age=300'" />
+                </exec>
             </then>
         </if>
     </target>
