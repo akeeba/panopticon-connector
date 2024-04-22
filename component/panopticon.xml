@@ -33,6 +33,8 @@
         </files>
 
         <languages folder="backend">
+            <language tag="de-DE">language/de-DE/com_panopticon.ini</language>
+            <language tag="de-DE">language/de-DE/com_panopticon.sys.ini</language>
             <language tag="en-GB">language/en-GB/com_panopticon.ini</language>
             <language tag="en-GB">language/en-GB/com_panopticon.sys.ini</language>
         </languages>
