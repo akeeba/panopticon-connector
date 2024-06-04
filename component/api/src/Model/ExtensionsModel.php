@@ -113,6 +113,7 @@ class ExtensionsModel extends ListModel
 		$protected = ($protected !== '' && is_numeric($protected)) ? intval($protected) : null;
 
 		$updateRelevantEIDs = $this->getPossiblyNaughtExtensionIDs();
+		$updateRelevantEIDs = empty($updateRelevantEIDs) ? [-1] : $updateRelevantEIDs;
 
 		$db    = method_exists($this, 'getDatabase') ? $this->getDatabase() : $this->getDbo();
 		$query = $db->getQuery(true)

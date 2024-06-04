@@ -6,11 +6,11 @@ This is the connector component for [Akeeba Panopticon](https://github.com/akeeb
 
 ## 🔎 Release highlights
 
-* **✨ Collect server information**. Panopticon can now collect and display information about your site's server.
+* **✨ Support for TUF (The Update Framework) in Joomla! 5.1 for Joomla! itself**. Joomla! 5.1 introduced a new, more secure way to retrieve _verified_ updates from its update servers. This is now being used by default.
 
 ## 🖥️ System Requirements
 
-* Joomla! 4.0, 4.1, 4.3, 4.3, 4.4, and 5.0.
+* Joomla! 4.0, 4.1, 4.3, 4.3, 4.4, 5.0, and 5.1.
 * PHP versions 7.2, 7.3, 7.4, 8.0, 8.1, 8.2, and 8.3 (PHP 8.1 or later required for Joomla! 5)
 
 ## 🧑🏽‍💻 Important note about the Joomla! API
@@ -27,8 +27,8 @@ If any of these plugins are disabled, _or if its Access is set to anything other
 
 ## 📋 CHANGELOG
 
-* ✨ Console plugin for CLI commands
-* 🐞 Chunked downloads were failing, in a way that was stalling the core update
+* ✨ Support for TUF (The Update Framework) in Joomla! 5.1 for Joomla! itself
+* 🐞 Occasional database exception when getting the extension update information
 
 Legend:
 * 🚨 Security update
