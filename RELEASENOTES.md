@@ -6,7 +6,7 @@ This is the connector component for [Akeeba Panopticon](https://github.com/akeeb
 
 ## 🔎 Release highlights
 
-* **✨ Support for TUF (The Update Framework) in Joomla! 5.1 for Joomla! itself**. Joomla! 5.1 introduced a new, more secure way to retrieve _verified_ updates from its update servers. This is now being used by default.
+* **✨ Troubleshooting aid for API application errors when connecting a Panopticon site**. Have you ever tried to connect a site to Panopticon, only to receive an error saying the API application doesn't work? In almost every case it's a third party plugin which is written incorrectly so that it either breaks the API application outright, or is not fully compatible with the Joomla! or PHP version you're using. Until now, it was really hard figuring out which plugin was the problem, and how to contact its developer. Not any more! We introduced a new system plugin which automatically catches the error condition, identifies the offending plugin, and reports this information back to you when you try to connect a site to Panopticon, or using its Connection Doctor!
 
 ## 🖥️ System Requirements
 
@@ -27,8 +27,7 @@ If any of these plugins are disabled, _or if its Access is set to anything other
 
 ## 📋 CHANGELOG
 
-* ✨ Support for TUF (The Update Framework) in Joomla! 5.1 for Joomla! itself
-* 🐞 Occasional database exception when getting the extension update information
+* ✨ Troubleshooting aid for API application errors when connecting a Panopticon site
 
 Legend:
 * 🚨 Security update
