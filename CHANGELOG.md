@@ -1,3 +1,7 @@
+# Akeeba Panopticon Connector for Joomla 4.x and 5.x version 1.0.6
+
+* ✨ Troubleshooting aid for API application errors when connecting a Panopticon site
+
 # Akeeba Panopticon Connector for Joomla 4.x and 5.x version 1.0.5
 
 * ✏️ Re-release because of a packaging issue

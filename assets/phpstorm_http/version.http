@@ -2,4 +2,4 @@
 GET {{endpoint}}/v1/panopticon/version
 Authorization: Bearer {{api_token}}
 Accept: application/vnd.api+json
-User-Agent: FooBar/1.0
+User-Agent: panopticon/1.0

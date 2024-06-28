@@ -2,31 +2,31 @@
 GET {{endpoint}}/v1/panopticon/updatesites
 Authorization: Bearer {{api_token}}
 Accept: application/vnd.api+json
-User-Agent: FooBar/1.0
+User-Agent: panopticon/1.0
 
 ### Get disabled update sites
 GET {{endpoint}}/v1/panopticon/updatesites?enabled=0
 Authorization: Bearer {{api_token}}
 Accept: application/vnd.api+json
-User-Agent: FooBar/1.0
+User-Agent: panopticon/1.0
 
 ### Get update sites for extension 448
 GET {{endpoint}}/v1/panopticon/updatesites?eid[]=448
 Authorization: Bearer {{api_token}}
 Accept: application/vnd.api+json
-User-Agent: FooBar/1.0
+User-Agent: panopticon/1.0
 
 ### Get update site with ID 303
 GET {{endpoint}}/v1/panopticon/updatesite/303
 Authorization: Bearer {{api_token}}
 Accept: application/vnd.api+json
-User-Agent: FooBar/1.0
+User-Agent: panopticon/1.0
 
 ### Modify update site 303
 PATCH {{endpoint}}/v1/panopticon/updatesite/303
 Authorization: Bearer {{api_token}}
 Accept: application/vnd.api+json
-User-Agent: FooBar/1.0
+User-Agent: panopticon/1.0
 Content-Type: application/json
 
 // IMPORTANT:
@@ -41,4 +41,4 @@ Content-Type: application/json
 POST {{endpoint}}/v1/panopticon/updatesites/rebuild
 Authorization: Bearer {{api_token}}
 Accept: application/vnd.api+json
-User-Agent: FooBar/1.0
+User-Agent: panopticon/1.0

@@ -3,28 +3,28 @@ GET {{endpoint}}/v1/panopticon/core/update
 Authorization: Bearer {{api_token}}
 X-Joomla-Token: {{api_token}}
 Accept: application/vnd.api+json
-User-Agent: FooBar/1.0
+User-Agent: panopticon/1.0
 
 ### Forcibly get Joomla update information
 GET {{endpoint}}/v1/panopticon/core/update?force=1
 Authorization: Bearer {{api_token}}
 X-Joomla-Token: {{api_token}}
 Accept: application/vnd.api+json
-User-Agent: FooBar/1.0
+User-Agent: panopticon/1.0
 
 ### Apply the update site
 POST {{endpoint}}/v1/panopticon/core/update
 Authorization: Bearer {{api_token}}
 X-Joomla-Token: {{api_token}}
 Accept: application/vnd.api+json
-User-Agent: FooBar/1.0
+User-Agent: panopticon/1.0
 
 ### Change the update source to Testing
 POST {{endpoint}}/v1/panopticon/core/update
 Authorization: Bearer {{api_token}}
 X-Joomla-Token: {{api_token}}
 Accept: application/vnd.api+json
-User-Agent: FooBar/1.0
+User-Agent: panopticon/1.0
 Content-Type: application/x-www-form-urlencoded
 
 updatesource=testing
@@ -34,7 +34,7 @@ POST {{endpoint}}/v1/panopticon/core/update
 Authorization: Bearer {{api_token}}
 X-Joomla-Token: {{api_token}}
 Accept: application/vnd.api+json
-User-Agent: FooBar/1.0
+User-Agent: panopticon/1.0
 Content-Type: application/x-www-form-urlencoded
 
 updatesource=nochange
@@ -44,21 +44,21 @@ POST {{endpoint}}/v1/panopticon/core/update/download
 Authorization: Bearer {{api_token}}
 X-Joomla-Token: {{api_token}}
 Accept: application/vnd.api+json
-User-Agent: FooBar/1.0
+User-Agent: panopticon/1.0
 
 ### Download the update, chunked
 POST {{endpoint}}/v1/panopticon/core/update/download/chunked
 Authorization: Bearer {{api_token}}
 X-Joomla-Token: {{api_token}}
 Accept: application/vnd.api+json
-User-Agent: FooBar/1.0
+User-Agent: panopticon/1.0
 
 ### Continue downloading the update, chunked
 POST {{endpoint}}/v1/panopticon/core/update/download/chunked
 Authorization: Bearer {{api_token}}
 X-Joomla-Token: {{api_token}}
 Accept: application/vnd.api+json
-User-Agent: FooBar/1.0
+User-Agent: panopticon/1.0
 Content-Type: application/x-www-form-urlencoded
 
 url=https://update.joomla.org/releases/4.4.2/Joomla_4.4.2-Stable-Update_Package.zip&size=29509968&offset=9328639&chunk_index=7&max_time=10
@@ -68,14 +68,14 @@ POST {{endpoint}}/v1/panopticon/core/update/activate
 Authorization: Bearer {{api_token}}
 X-Joomla-Token: {{api_token}}
 Accept: application/vnd.api+json
-User-Agent: FooBar/1.0
+User-Agent: panopticon/1.0
 Content-Type: application/x-www-form-urlencoded
 
 basename=Joomla_4.3.0-Stable-Update_Package.zip
 
 ### Joomla! Update finalisation
 POST {{endpoint}}/../administrator/components/com_joomlaupdate/extract.php
-User-Agent: FooBar/1.0
+User-Agent: panopticon/1.0
 Content-Type: application/x-www-form-urlencoded
 
 task=finalizeUpdate&password=QxU7toNjaTlJg8fl1sZUMMP06hxaYNWV
@@ -85,7 +85,7 @@ POST {{endpoint}}/v1/panopticon/core/update/postupdate
 Authorization: Bearer {{api_token}}
 X-Joomla-Token: {{api_token}}
 Accept: application/vnd.api+json
-User-Agent: FooBar/1.0
+User-Agent: panopticon/1.0
 Content-Type: application/x-www-form-urlencoded
 
 basename=Joomla_4.3.0-Stable-Update_Package.zip
@@ -95,4 +95,4 @@ POST {{endpoint}}/v1/panopticon/core/update/disable
 Authorization: Bearer {{api_token}}
 X-Joomla-Token: {{api_token}}
 Accept: application/vnd.api+json
-User-Agent: FooBar/1.0
+User-Agent: panopticon/1.0
