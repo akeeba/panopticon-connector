@@ -4,6 +4,8 @@ This is the connector component for [Akeeba Panopticon](https://github.com/akeeb
 
 ℹ️ If you have a Joomla! 3 site please [look at the Joomla 3 connector's repository](https://github.com/akeeba/panopticon_connector_j3/releases/latest) instead.
 
+`ℹ️ If you have a WordPress site please [look at the WordPress connector's repository](https://github.com/akeeba/panopticon-connector-wordpress/releases/latest) instead. 
+`
 ## 🔎 Release highlights
 
 * **✨ Troubleshooting aid for API application errors when connecting a Panopticon site**. Have you ever tried to connect a site to Panopticon, only to receive an error saying the API application doesn't work? In almost every case it's a third party plugin which is written incorrectly so that it either breaks the API application outright, or is not fully compatible with the Joomla! or PHP version you're using. Until now, it was really hard figuring out which plugin was the problem, and how to contact its developer. Not any more! We introduced a new system plugin which automatically catches the error condition, identifies the offending plugin, and reports this information back to you when you try to connect a site to Panopticon, or using its Connection Doctor!
