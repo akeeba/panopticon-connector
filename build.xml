@@ -57,6 +57,11 @@
     Tasks - General
     ====================================================================================================
     -->
+    <target name="all" description="Makes everything"
+            depends="git,update_xml">
+    </target>
+
+
     <target name="git" description="Makes only packages, not the documentation"
             depends="new-release,setup-properties,component-packages,update_xml">
     </target>
