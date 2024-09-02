@@ -29,7 +29,7 @@ if (!$user->authorise('core.manage') || $this->isWebServicesPluginEnabled)
 	</p>
 	<p>
 		<a
-			class="btn btn-primary"
+			class="btn btn-primary text-light"
 			href="index.php?option=com_plugins&view=plugins&filter[folder]=webservices&filter[element]=panopticon&filter[enabled]=0&filter[access]=&filter[search]=">
 			<span class="icon-eye-open" aria-hidden="true"></span>
 			<?= Text::_('COM_PANOPTICON_WELCOME_ERR_COMMON_ACTION') ?>
