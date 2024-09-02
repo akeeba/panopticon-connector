@@ -21,5 +21,6 @@ use Joomla\CMS\Layout\LayoutHelper;
 echo $this->loadTemplate('plgauth');
 echo $this->loadTemplate('plgusertoken');
 echo $this->loadTemplate('hastoken');
+echo $this->loadTemplate('plginstaller');
 echo $this->loadTemplate('plgwebservices');
 echo $this->loadTemplate('info');

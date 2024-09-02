@@ -32,6 +32,14 @@ class HtmlView extends BaseHtmlView
 	protected $isWebServicesPluginEnabled = false;
 
 	/**
+	 * Is the "Web Services - Installer" plugin installed and enabled?
+	 *
+	 * @var   bool
+	 * @since 1.0.0
+	 */
+	protected $isWebServicesInstallerPluginEnabled = false;
+
+	/**
 	 * Is the "API Authentication - Web Services Joomla Token" plugin installed and enabled?
 	 *
 	 * @var   bool
@@ -70,12 +78,12 @@ class HtmlView extends BaseHtmlView
 			'plug'
 		);
 
-		$this->isWebServicesPluginEnabled = PluginHelper::isEnabled('webservices', 'panopticon');
-		$this->isTokenAuthPluginEnabled   = PluginHelper::isEnabled('api-authentication', 'token');
-		$this->isUserTokenPluginEnabled   = PluginHelper::isEnabled('user', 'token');
-		$this->hasToken                   = !empty($this->getApiToken());
-		$this->isAllowedUser              = $this->isAllowedUser();
-
+		$this->isWebServicesPluginEnabled          = PluginHelper::isEnabled('webservices', 'panopticon');
+		$this->isWebServicesInstallerPluginEnabled = PluginHelper::isEnabled('webservices', 'installer');
+		$this->isTokenAuthPluginEnabled            = PluginHelper::isEnabled('api-authentication', 'token');
+		$this->isUserTokenPluginEnabled            = PluginHelper::isEnabled('user', 'token');
+		$this->hasToken                            = !empty($this->getApiToken());
+		$this->isAllowedUser                       = $this->isAllowedUser();
 
 		parent::display($tpl);
 	}
