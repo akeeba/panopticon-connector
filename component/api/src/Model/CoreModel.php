@@ -18,6 +18,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Filesystem\File;
 use Joomla\CMS\Http\HttpFactory;
 use Joomla\CMS\MVC\Factory\MVCFactory;
+use Joomla\CMS\MVC\Model\BaseModel;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\CMS\Updater\Updater;
 use Joomla\CMS\User\UserHelper;
@@ -197,6 +198,51 @@ class CoreModel extends UpdateModel
 		}
 
 		return $updateInfo;
+	}
+
+	public function useAdminToolsResetJoomlaUpdate(): bool
+	{
+		// Make sure the component is installed
+		$adminToolsExtensionRecord = ComponentHelper::getComponent('com_admintools', true);
+
+		if (!$adminToolsExtensionRecord->enabled)
+		{
+			return false;
+		}
+
+		// Try to get the JupdateModel model
+		try
+		{
+			$model = Factory::getApplication()
+				->bootComponent('com_admintools')
+				->getMVCFactory()
+				->createModel('Jupdate', 'Administrator');
+		}
+		catch (Throwable $e)
+		{
+			return false;
+		}
+
+		if (!$model instanceof BaseModel)
+		{
+			return false;
+		}
+
+		if (!method_exists($model, 'resetJoomlaUpdate'))
+		{
+			return false;
+		}
+
+		try
+		{
+			$model->resetJoomlaUpdate();
+		}
+		catch (Throwable $e)
+		{
+			return false;
+		}
+
+		return true;
 	}
 
 	public function affirmCoreUpdateRecord()
@@ -789,8 +835,8 @@ ENDDATA;
 					}
 				}
 
-				$debugEntry['decision']      = 'sleep';
-				$debugEntry['sleepTime']     = $sleepTime;
+				$debugEntry['decision']  = 'sleep';
+				$debugEntry['sleepTime'] = $sleepTime;
 			}
 			elseif ($timeElapsed < 2.0)
 			{

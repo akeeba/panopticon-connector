@@ -71,11 +71,23 @@ class CoreController extends ApiController
 			$model->changeUpdateSource($updateSource, $updateURL);
 		}
 
-		// Make sure there is a core update record
-		$model->affirmCoreUpdateRecord();
+		/**
+		 * Reset the update source.
+		 *
+		 * We will first try to use Admin Tools Professional's Reset Joomla! Update feature which is the most complete
+		 * way to do that, even covering corrupt / missing TUF metadata.
+		 *
+		 * If this doesn't work (you do not have Admin Tools Professional, or not have a version of it with this
+		 * feature, or that feature fails) we will fall back to our legacy method.
+		 */
+		if (!$model->useAdminToolsResetJoomlaUpdate())
+		{
+			// Make sure there is a core update record
+			$model->affirmCoreUpdateRecord();
 
-		// Apply the update source
-		$model->applyUpdateSite();
+			// Apply the update source
+			$model->applyUpdateSite();
+		}
 
 		// Reload the update information
 		$model->getJoomlaUpdateInfo(true);
