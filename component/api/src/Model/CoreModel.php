@@ -60,6 +60,9 @@ class CoreModel extends UpdateModel
 
 	public function getJoomlaUpdateInfo(bool $force = false): object
 	{
+		$cParams       = ComponentHelper::getComponent('com_panopticon')->getParams();
+		$sysInfoToggle = $cParams->get('sysinfo', 1);
+
 		// Get the update parameters from the com_installer configuration
 		$params           = ComponentHelper::getComponent('com_installer')->getParams();
 		$cacheHours       = (int) $params->get('cachetimeout', 6);
@@ -99,7 +102,7 @@ class CoreModel extends UpdateModel
 				'api'     => $apiLevel,
 			],
 			'admintools'          => $this->getAdminToolsInformation(),
-			'serverInfo'          => (new ServerInfo($this->getDatabase()))(),
+			'serverInfo'          => $sysInfoToggle ? (new ServerInfo($this->getDatabase()))() : null,
 		];
 
 		// Get the file_joomla pseudo-extension's ID

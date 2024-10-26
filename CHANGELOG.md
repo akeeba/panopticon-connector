@@ -1,6 +1,7 @@
 # Akeeba Panopticon Connector for Joomla 4.x and 5.x version 1.0.7
 
 * ✏️ Warn the user if “Web Services - Installer” is not enabled.
+* ✏️ Option to disable system information collection.
 * ✨ Use Admin Tools Professional's Reset Joomla! Update feature (if available) to fix stuck core updates.
 
 # Akeeba Panopticon Connector for Joomla 4.x and 5.x version 1.0.6

@@ -7,6 +7,19 @@
   -->
 
 <config>
+    <fieldset name="prefs" label="COM_PANOPTICON_CONFIG_PREFS_LABEL">
+        <field name="sysinfo"
+               type="radio"
+               layout="joomla.form.field.radio.switcher"
+               default="1"
+               label="COM_PANOPTICON_CONFIG_SYSINFO_LABEL"
+               description="COM_PANOPTICON_CONFIG_SYSINFO_DESC"
+               class="btn-group btn-group-yesno">
+            <option value="0">JNO</option>
+            <option value="1">JYES</option>
+        </field>
+
+    </fieldset>
     <fieldset
             name="permissions"
             label="JCONFIG_PERMISSIONS_LABEL"
