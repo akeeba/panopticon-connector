@@ -155,7 +155,7 @@
                     <arg value="${dirs.root}/updates/pkg_panopticon.xml" />
                     <arg value="s3://${s3.bucket}/updates/pkg_panopticon.xml" />
                     <arg value="--acl-public" />
-                    <arg value="--add-header='Cache-Control:max-age=300'" />
+                    <arg value="--add-header=Cache-Control:max-age=300" />
                 </exec>
             </then>
         </if>
