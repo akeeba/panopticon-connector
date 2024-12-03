@@ -29,7 +29,9 @@ If any of these plugins are disabled, _or if its Access is set to anything other
 
 ## 📋 CHANGELOG
 
-* ✨ Troubleshooting aid for API application errors when connecting a Panopticon site
+* ✏️ Warn the user if “Web Services - Installer” is not enabled.
+* ✏️ Option to disable system information collection.
+* ✨ Use Admin Tools Professional's Reset Joomla! Update feature (if available) to fix stuck core updates.
 
 Legend:
 * 🚨 Security update
