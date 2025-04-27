@@ -150,7 +150,7 @@ class GetToken extends AbstractCommand implements DatabaseAwareInterface
 	 *
 	 * @since   1.0.3
 	 */
-	private function getApiToken(User $user = null): string
+	private function getApiToken(?User $user = null): string
 	{
 		$tokenSeed    = $this->getUserProfileValue($user, 'joomlatoken.token');
 		$tokenEnabled = $this->getUserProfileValue($user, 'joomlatoken.enabled', 1);

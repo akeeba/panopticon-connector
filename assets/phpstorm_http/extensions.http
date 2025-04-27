@@ -1,3 +1,10 @@
+### Core Joomla API: Extensions
+GET {{endpoint}}/v1/extensions
+Authorization: Bearer {{api_token}}
+X-Joomla-Token: {{api_token}}
+Accept: application/vnd.api+json
+User-Agent: panopticon/1.0
+
 ### Get all extensions
 #GET {{endpoint}}/v1/panopticon/extensions
 GET {{endpoint}}/v1/panopticon/extensions?page[limit]=1000
