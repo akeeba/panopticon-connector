@@ -9,6 +9,7 @@ namespace Akeeba\Component\Panopticon\Api\Controller;
 
 defined('_JEXEC') || die;
 
+use Akeeba\Component\Panopticon\Api\Mixin\J6FixBrokenModelStateTrait;
 use Akeeba\Component\Panopticon\Api\Model\BackupModel;
 use Joomla\CMS\Access\Exception\NotAllowed;
 use Joomla\CMS\MVC\Controller\ApiController;
@@ -20,6 +21,8 @@ use Tobscure\JsonApi\Resource;
 
 class BackupController extends ApiController
 {
+	use J6FixBrokenModelStateTrait;
+
 	protected $contentType = 'akeebabackup';
 
 	protected $default_view = 'backup';

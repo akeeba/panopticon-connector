@@ -7,7 +7,6 @@
 
 namespace Akeeba\Component\Panopticon\Api\Table;
 
-
 defined('_JEXEC') || die;
 
 class UpdatesiteTable extends \Joomla\Component\Installer\Administrator\Table\UpdatesiteTable

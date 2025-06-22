@@ -9,12 +9,15 @@ namespace Akeeba\Component\Panopticon\Api\Controller;
 
 defined('_JEXEC') || die;
 
+use Akeeba\Component\Panopticon\Api\Mixin\J6FixBrokenModelStateTrait;
 use Akeeba\Component\Panopticon\Api\Model\ExtensionsModel;
 use Joomla\CMS\MVC\Controller\ApiController;
 use Joomla\CMS\MVC\Controller\Exception\ResourceNotFound;
 
 class ExtensionsController extends ApiController
 {
+	use J6FixBrokenModelStateTrait;
+
 	protected $contentType = 'extensions';
 
 	protected $default_view = 'extensions';

@@ -9,10 +9,13 @@ namespace Akeeba\Component\Panopticon\Api\Controller;
 
 defined('_JEXEC') || die;
 
+use Akeeba\Component\Panopticon\Api\Mixin\J6FixBrokenModelStateTrait;
 use Joomla\CMS\MVC\Controller\ApiController;
 
 class TemplatechangedController extends ApiController
 {
+	use J6FixBrokenModelStateTrait;
+
 	protected $contentType = 'templatechanged';
 
 	protected $default_view = 'templatechanged';

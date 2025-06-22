@@ -7,10 +7,9 @@
 
 namespace Akeeba\Component\Panopticon\Api\Model;
 
+defined('_JEXEC') || die;
 
 use Joomla\CMS\MVC\Model\AdminModel;
-
-defined('_JEXEC') || die;
 
 class ExtensionModel extends AdminModel
 {

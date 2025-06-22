@@ -9,9 +9,9 @@ namespace Akeeba\Component\Panopticon\Api\Controller;
 
 defined('_JEXEC') || die;
 
+use Akeeba\Component\Panopticon\Api\Mixin\J6FixBrokenModelStateTrait;
 use Akeeba\Component\Panopticon\Api\Model\UpdatesiteModel;
 use Akeeba\Component\Panopticon\Api\Model\UpdatesitesModel;
-use Akeeba\Component\Panopticon\Api\View\Updatesites\JsonapiView;
 use Exception;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Controller\ApiController;
@@ -22,6 +22,8 @@ use RuntimeException;
 
 class UpdatesitesController extends ApiController
 {
+	use J6FixBrokenModelStateTrait;
+
 	protected $contentType = 'updatesites';
 
 	protected $default_view = 'updatesites';

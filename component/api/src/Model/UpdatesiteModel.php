@@ -7,9 +7,9 @@
 
 namespace Akeeba\Component\Panopticon\Api\Model;
 
-use Joomla\CMS\Form\Form;
-
 defined('_JEXEC') || die;
+
+use Joomla\CMS\Form\Form;
 
 class UpdatesiteModel extends \Joomla\Component\Installer\Administrator\Model\UpdatesiteModel
 {

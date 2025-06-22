@@ -9,6 +9,7 @@ namespace Akeeba\Component\Panopticon\Api\Controller;
 
 defined('_JEXEC') || die;
 
+use Akeeba\Component\Panopticon\Api\Mixin\J6FixBrokenModelStateTrait;
 use Akeeba\Component\Panopticon\Api\Model\CoreModel;
 use Joomla\CMS\Access\Exception\NotAllowed;
 use Joomla\CMS\Language\Text;
@@ -20,6 +21,8 @@ use Tobscure\JsonApi\Resource;
 
 class CoreController extends ApiController
 {
+	use J6FixBrokenModelStateTrait;
+
 	protected $contentType = 'coreupdate';
 
 	protected $default_view = 'core';
@@ -37,7 +40,6 @@ class CoreController extends ApiController
 
 		return '';
 	}
-
 
 	public function getupdate()
 	{

@@ -9,6 +9,7 @@ namespace Akeeba\Component\Panopticon\Api\Controller;
 
 defined('_JEXEC') || die;
 
+use Akeeba\Component\Panopticon\Api\Mixin\J6FixBrokenModelStateTrait;
 use Joomla\CMS\Access\Exception\NotAllowed;
 use Joomla\CMS\Application\CMSApplication;
 use Joomla\CMS\Component\ComponentHelper;
@@ -21,6 +22,8 @@ use Joomla\Component\Installer\Administrator\Model\UpdateModel;
 
 class UpdatesController extends ApiController
 {
+	use J6FixBrokenModelStateTrait;
+
 	protected $contentType = 'updates';
 
 	protected $default_view = 'updates';

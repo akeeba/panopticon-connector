@@ -10,6 +10,7 @@ namespace Akeeba\Component\Panopticon\Api\Controller;
 defined('_JEXEC') || die;
 
 use Akeeba\Component\AdminTools\Administrator\Scanner\Util\Session;
+use Akeeba\Component\Panopticon\Api\Mixin\J6FixBrokenModelStateTrait;
 use DateInterval;
 use Joomla\CMS\Access\Access;
 use Joomla\CMS\Crypt\Crypt;
@@ -28,6 +29,8 @@ use function strlen;
 
 class AdmintoolsController extends ApiController
 {
+	use J6FixBrokenModelStateTrait;
+
 	private static $models = [];
 
 	protected $contentType = 'admintools';

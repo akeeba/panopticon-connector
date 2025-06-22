@@ -7,14 +7,14 @@
 
 namespace Akeeba\Component\Panopticon\Api\Library;
 
+defined('_JEXEC') || die;
+
 use Joomla\CMS\Factory;
 use Joomla\Database\DatabaseDriver;
 use Joomla\Database\DatabaseInterface;
 use Throwable;
 use const DIRECTORY_SEPARATOR;
 use const PHP_OS;
-
-defined('_JEXEC') || die;
 
 class ServerInfo
 {

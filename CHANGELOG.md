@@ -1,3 +1,6 @@
+# Akeeba Panopticon Connector for Joomla 4.x and 5.x version 1.0.8
+* ‼️ Joomla 6.0 alpha1 compatibility
+
 # Akeeba Panopticon Connector for Joomla 4.x and 5.x version 1.0.7
 
 * ✏️ Warn the user if “Web Services - Installer” is not enabled.

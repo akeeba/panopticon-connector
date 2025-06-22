@@ -7,9 +7,9 @@
 
 namespace Akeeba\Component\Panopticon\Api\Model;
 
-use Joomla\Database\ParameterType;
-
 defined('_JEXEC') || die;
+
+use Joomla\Database\ParameterType;
 
 class UpdatesitesModel extends \Joomla\Component\Installer\Administrator\Model\UpdatesitesModel
 {
