@@ -16,7 +16,6 @@ use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Extension\ExtensionHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Filesystem\File;
-use Joomla\CMS\Http\HttpFactory;
 use Joomla\CMS\MVC\Factory\MVCFactory;
 use Joomla\CMS\MVC\Model\BaseModel;
 use Joomla\CMS\Plugin\PluginHelper;
@@ -27,6 +26,7 @@ use Joomla\Component\Installer\Administrator\Table\UpdatesiteTable;
 use Joomla\Component\Joomlaupdate\Administrator\Model\UpdateModel;
 use Joomla\Database\DatabaseDriver;
 use Joomla\Database\ParameterType;
+use Joomla\Http\HttpFactory;
 use Joomla\Registry\Registry;
 use ReflectionClass;
 use RuntimeException;
@@ -595,7 +595,7 @@ ENDDATA;
 						$version    = new Version;
 						$httpOption = new Registry;
 						$httpOption->set('userAgent', $version->getUserAgent('Joomla', true, false));
-						$http     = HttpFactory::getHttp($httpOption);
+						$http     = (new HttpFactory())->getHttp($httpOption);
 						$response = $http->head($url);
 
 						if ($response->code != 200)
@@ -660,7 +660,7 @@ ENDDATA;
 		$version    = new Version;
 		$httpOption = new Registry;
 		$httpOption->set('userAgent', $version->getUserAgent('Joomla', true, false));
-		$http = HttpFactory::getHttp($httpOption);
+		$http = (new HttpFactory())->getHttp($httpOption);
 
 		// Open the output file.
 		$tempDir = Factory::getApplication()->get('tmp_path');
@@ -936,7 +936,7 @@ ENDDATA;
 			$version    = new Version;
 			$httpOption = new Registry;
 			$httpOption->set('userAgent', $version->getUserAgent('Joomla', true, false));
-			$http     = HttpFactory::getHttp($httpOption);
+			$http     = (new HttpFactory())->getHttp($httpOption);
 			$response = $http->get($updateObject->detailsurl);
 		}
 		catch (RuntimeException $e)
