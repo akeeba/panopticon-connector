@@ -73,7 +73,7 @@ class Panopticon extends CMSPlugin implements SubscriberInterface, DatabaseAware
 		}
 
 		// Make sure this is a request coming from Panopticon
-		$userAgent = $app->input->server->getString('HTTP_USER_AGENT');
+		$userAgent = $app->getInput()->server->getString('HTTP_USER_AGENT');
 
 		if (strpos($userAgent, 'panopticon/') !== 0)
 		{
