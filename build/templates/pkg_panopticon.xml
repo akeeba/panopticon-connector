@@ -35,6 +35,6 @@
     <scriptfile>script.panopticon.php</scriptfile>
 
     <updateservers>
-        <server type="extension" priority="1" name="Akeeba Panopticon Connector for Joomla! 4 and later">https://akeeba-cdn.s3.amazonaws.com/updates/pkg_panopticon.xml</server>
+        <server type="extension" priority="1" name="Akeeba Panopticon Connector for Joomla! 4 and later">https://cdn.akeeba.com/updates/pkg_panopticon.xml</server>
     </updateservers>
 </extension>
