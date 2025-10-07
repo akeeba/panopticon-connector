@@ -10,11 +10,11 @@ namespace Akeeba\Component\Panopticon\Api\Model;
 defined('_JEXEC') || die;
 
 use Joomla\CMS\Factory;
-use Joomla\CMS\Filesystem\Path;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\CMS\MVC\Model\ListModel;
 use Joomla\Component\Templates\Administrator\Model\TemplateModel;
 use Joomla\Database\ParameterType;
+use Joomla\Filesystem\Path;
 
 class TemplatechangedModel extends ListModel
 {
