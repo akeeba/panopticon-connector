@@ -1,5 +1,6 @@
 # Akeeba Panopticon Connector for Joomla 4.x and 5.x version 1.0.8
-* ‼️ Support for Joomla 6
+* ✨ Support for Joomla 6
+* ✨ PHP 8.5 compatibility
 
 # Akeeba Panopticon Connector for Joomla 4.x and 5.x version 1.0.7
 

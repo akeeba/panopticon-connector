@@ -28,7 +28,7 @@ class ExtensionsModel extends ListModel
 {
 	use ElementToExtensionIdTrait;
 
-	public function __construct($config = [], MVCFactoryInterface $factory = null)
+	public function __construct($config = [], ?MVCFactoryInterface $factory = null)
 	{
 		$config['filter_fields'] = $config['filter_fields'] ?? [
 			'updatable',

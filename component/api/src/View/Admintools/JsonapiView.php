@@ -48,7 +48,7 @@ class JsonapiView extends BaseJsonApiView
 		'acknowledged',
 	];
 
-	public function displayList(array $items = null)
+	public function displayList(?array $items = null)
 	{
 		if ($this->type === 'admintools.scanalerts')
 		{

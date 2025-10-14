@@ -24,7 +24,7 @@ class JsonapiView extends BaseJsonApiView
 	 *
 	 * @since   4.0.0
 	 */
-	public function displayList(array $items = null)
+	public function displayList(?array $items = null)
 	{
 		// Get page query
 		$currentUrl                    = Uri::getInstance();
