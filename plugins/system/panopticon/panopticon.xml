@@ -7,8 +7,8 @@
 
 <extension type="plugin" group="system" method="upgrade">
     <name>PLG_SYSTEM_PANOPTICON</name>
-    <version>1.0.7</version>
-    <creationDate>2024-12-03</creationDate>
+    <version>1.0.8</version>
+    <creationDate>2025-10-15</creationDate>
     <author>Nicholas K. Dionysopoulos</author>
     <authorEmail>nicholas@dionysopoulos.me</authorEmail>
     <authorUrl>https://www.akeeba.com</authorUrl>

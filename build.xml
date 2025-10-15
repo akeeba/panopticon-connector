@@ -63,7 +63,7 @@
 
 
     <target name="git" description="Makes only packages, not the documentation"
-            depends="new-release,setup-properties,component-packages,update_xml">
+            depends="new-release,setup-properties,component-packages">
     </target>
 
     <target name="new-release" depends="composer-install,link">
@@ -150,13 +150,13 @@
                 <xmlupdate xml="${update.all}" tofile="${dirs.root}/updates/pkg_panopticon.xml" />
 
                 <!-- Upload the update XML file to S3 as well -->
-                <exec executable="s3cmd" passthru="true">
-                    <arg value="put" />
-                    <arg value="${dirs.root}/updates/pkg_panopticon.xml" />
-                    <arg value="s3://${s3.bucket}/updates/pkg_panopticon.xml" />
-                    <arg value="--acl-public" />
-                    <arg value="--add-header=Cache-Control:max-age=300" />
-                </exec>
+<!--                <exec executable="s3cmd" passthru="true">-->
+<!--                    <arg value="put" />-->
+<!--                    <arg value="${dirs.root}/updates/pkg_panopticon.xml" />-->
+<!--                    <arg value="s3://${s3.bucket}/updates/pkg_panopticon.xml" />-->
+<!--                    <arg value="&#45;&#45;acl-public" />-->
+<!--                    <arg value="&#45;&#45;add-header=Cache-Control:max-age=300" />-->
+<!--                </exec>-->
             </then>
         </if>
     </target>
