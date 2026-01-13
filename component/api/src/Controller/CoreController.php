@@ -12,11 +12,14 @@ defined('_JEXEC') || die;
 use Akeeba\Component\Panopticon\Api\Mixin\J6FixBrokenModelStateTrait;
 use Akeeba\Component\Panopticon\Api\Model\CoreModel;
 use Joomla\CMS\Access\Exception\NotAllowed;
+use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Log\Log;
 use Joomla\CMS\MVC\Controller\ApiController;
 use Joomla\CMS\Serializer\JoomlaSerializer;
 use Joomla\CMS\Uri\Uri;
+use Joomla\Http\HttpFactory;
+use Joomla\Registry\Registry;
 use Tobscure\JsonApi\Resource;
 
 class CoreController extends ApiController
@@ -263,5 +266,154 @@ class CoreController extends ApiController
 		]);
 
 		$this->app->setHeader('status', $errorCode);
+	}
+
+	public function prepareChecksum()
+	{
+		if (!$this->app->getIdentity()->authorise('core.manage', 'com_joomlaupdate'))
+		{
+			throw new NotAllowed($this->app->getLanguage()->_('JERROR_ALERTNOAUTHOR'), 403);
+		}
+
+		$version = JVERSION;
+		$url     = "https://getpanopticon.com/checksums/joomla/{$version}/sha256_squash.json.gz";
+		$tmpFile = Factory::getApplication()->get('tmp_path') . '/sha256_squash.json.gz';
+
+		$options = new Registry();
+		$options->set('transport.curl', [CURLOPT_FOLLOWLOCATION => true]);
+		$http     = (new HttpFactory)->getHttp($options);
+		$response = $http->get($url);
+
+		if ($response->getStatusCode() !== 200)
+		{
+			throw new \RuntimeException("Could not download checksums from $url (HTTP " . $response->getStatusCode() . ")");
+		}
+
+		$body = (string) $response->getBody();
+		file_put_contents($tmpFile, $body);
+
+		$gzContent = gzdecode($body);
+
+		if ($gzContent === false)
+		{
+			@unlink($tmpFile);
+			throw new \RuntimeException("Failed to decompress checksums file");
+		}
+
+		$checksums = json_decode($gzContent, true);
+
+		if (json_last_error() !== JSON_ERROR_NONE)
+		{
+			@unlink($tmpFile);
+			throw new \RuntimeException("Failed to parse checksums JSON: " . json_last_error_msg());
+		}
+
+		@unlink($tmpFile);
+
+		$db = Factory::getDbo();
+		$db->truncateTable('#__panopticon_coresums');
+
+		$paths     = array_keys($checksums);
+		$total     = count($paths);
+		$batchSize = 100;
+
+		for ($i = 0; $i < $total; $i += $batchSize)
+		{
+			$query = $db->getQuery(true)
+				->insert($db->quoteName('#__panopticon_coresums'))
+				->columns([
+					$db->quoteName('path'),
+					$db->quoteName('checksum'),
+				]);
+
+			$batch = array_slice($paths, $i, $batchSize);
+
+			foreach ($batch as $path)
+			{
+				$query->values($db->quote($path) . ', ' . $db->quote($checksums[$path]));
+			}
+
+			$db->setQuery($query)->execute();
+		}
+
+		$this->app->setHeader('status', 200);
+		echo json_encode(true);
+		$this->app->close();
+	}
+
+	public function stepChecksum()
+	{
+		if (!$this->app->getIdentity()->authorise('core.manage', 'com_joomlaupdate'))
+		{
+			throw new NotAllowed($this->app->getLanguage()->_('JERROR_ALERTNOAUTHOR'), 403);
+		}
+
+		$step = $this->input->getInt('step', 0);
+		$db   = Factory::getDbo();
+
+		$startTime    = microtime(true);
+		$invalidFiles = [];
+		$last_id      = $step;
+		$done         = false;
+
+		while (true)
+		{
+			$query = $db->getQuery(true)
+				->select('*')
+				->from($db->quoteName('#__panopticon_coresums'))
+				->where($db->quoteName('id') . ' > ' . (int) $last_id)
+				->order($db->quoteName('id') . ' ASC');
+			$db->setQuery($query, 0, 250);
+			$rows = $db->loadObjectList();
+
+			if (empty($rows))
+			{
+				$done = true;
+				break;
+			}
+
+			foreach ($rows as $row)
+			{
+				$path             = $row->path;
+				$expectedChecksum = $row->checksum;
+				$fullPath         = JPATH_ROOT . '/' . $path;
+				$actualChecksum   = '';
+
+				if (@is_file($fullPath))
+				{
+					$content = @file_get_contents($fullPath);
+
+					if ($content === false)
+					{
+						continue;
+					}
+
+					$content        = preg_replace('#[\n\r\t\s\v]+#ms', ' ', $content);
+					$actualChecksum = hash('sha256', $content);
+				}
+
+				if ($actualChecksum !== $expectedChecksum)
+				{
+					$invalidFiles[] = $path;
+				}
+
+				$last_id = $row->id;
+			}
+
+			if ((microtime(true) - $startTime) >= 2.0)
+			{
+				break;
+			}
+		}
+
+		$result = [
+			'done'         => $done,
+			'last_id'      => (int) $last_id,
+			'invalidFiles' => $invalidFiles,
+		];
+
+		$this->app->setHeader('status', 200);
+		echo json_encode($result);
+		$this->app->close();
 	}
 }

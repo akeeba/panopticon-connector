@@ -190,6 +190,22 @@ class Panopticon extends CMSPlugin implements SubscriberInterface
 
 		$routes[] = new Route(
 			['GET'],
+			self::API_PREFIX . 'core/checksum/prepare',
+			'core.prepareChecksum',
+			[],
+			$defaults
+		);
+
+		$routes[] = new Route(
+			['GET'],
+			self::API_PREFIX . 'core/checksum/step/:step',
+			'core.stepChecksum',
+			['step' => '(\d+)'],
+			$defaults
+		);
+
+		$routes[] = new Route(
+			['GET'],
 			self::API_PREFIX . 'template/overrides/changed',
 			'templatechanged.displayList',
 			[],

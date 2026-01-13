@@ -18,6 +18,7 @@
 		"ext-mbstring": "*",
 		"ext-json": "*",
 		"ext-simplexml": "*",
+		"ext-zlib": "*",
 		"z4kn4fein/php-semver": "^1.2.0"
 	},
 	"suggest": {
