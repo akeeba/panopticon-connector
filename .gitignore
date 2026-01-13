@@ -16,3 +16,6 @@
 
 ### Private files
 /assets/phpstorm_http/http-client.private.env.json
+
+### PhpStorm
+/.idea/laravel-idea.xml
