@@ -11,8 +11,18 @@ defined('_JEXEC') || die;
 
 use Akeeba\Component\Panopticon\Api\Mixin\J6FixBrokenModelStateTrait;
 use Akeeba\Component\Panopticon\Api\Model\ExtensionsModel;
+use Joomla\CMS\Access\Exception\NotAllowed;
+use Joomla\CMS\Factory;
+use Joomla\CMS\Filesystem\File;
+use Joomla\CMS\Installer\Installer;
+use Joomla\CMS\Serializer\JoomlaSerializer;
+use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\MVC\Controller\ApiController;
 use Joomla\CMS\MVC\Controller\Exception\ResourceNotFound;
+use Joomla\Http\HttpFactory;
+use RuntimeException;
+use Throwable;
+use Tobscure\JsonApi\Resource;
 
 class ExtensionsController extends ApiController
 {
@@ -72,6 +82,165 @@ class ExtensionsController extends ApiController
 		}
 
 		return parent::displayItem($id);
+	}
+
+	public function install(): void
+	{
+		if (!$this->app->getIdentity()->authorise('core.manage', 'com_installer'))
+		{
+			throw new NotAllowed($this->app->getLanguage()->_('JERROR_ALERTNOAUTHOR'), 403);
+		}
+
+		$tmpPath = Factory::getApplication()->get('tmp_path');
+
+		if (empty($tmpPath) || !is_dir($tmpPath) || !is_writable($tmpPath))
+		{
+			throw new RuntimeException('The Joomla temporary directory is not writable.', 500);
+		}
+
+		$method      = strtoupper($this->input->getMethod());
+		$packageFile = null;
+		try
+		{
+			if ($method === 'POST')
+			{
+				$url = $this->input->post->get('url', '', 'raw');
+				$url = filter_var($url, FILTER_SANITIZE_URL);
+
+				if (empty($url) || filter_var($url, FILTER_VALIDATE_URL) === false)
+				{
+					throw new RuntimeException('You must provide a URL to download the package.', 400);
+				}
+
+				$packageFile = $this->downloadPackageFromUrl($url, $tmpPath);
+			}
+			elseif ($method === 'PUT')
+			{
+				$packageFile = $this->storeUploadedPackage($tmpPath);
+			}
+			else
+			{
+				throw new RuntimeException('Unsupported method.', 405);
+			}
+
+			$installer = Installer::getInstance();
+			$installed = $installer->install($packageFile);
+
+			$result = (object) [
+				'id'       => 0,
+				'status'   => $installed,
+				'messages' => $this->app->getMessageQueue(true),
+			];
+
+			$this->respondInstall($result);
+		}
+		catch (Throwable $e)
+		{
+			$this->failWithError($e);
+		}
+		finally
+		{
+			if (!empty($packageFile) && is_string($packageFile) && is_file($packageFile))
+			{
+				File::delete($packageFile);
+			}
+		}
+	}
+
+	private function storeUploadedPackage(string $tmpPath): string
+	{
+		$rawFilename = $this->input->getString('filename', '');
+		$rawFilename = trim($rawFilename);
+		$filename    = str_replace(['.', '/', '\\'], '', $rawFilename);
+
+		if ($filename === '')
+		{
+			throw new RuntimeException('You must provide a filename.', 400);
+		}
+
+		$data = file_get_contents('php://input');
+
+		if ($data === false || $data === '')
+		{
+			throw new RuntimeException('No package data was uploaded.', 400);
+		}
+
+		$tmpPath = rtrim($tmpPath, '/\\');
+		$path    = $tmpPath . '/' . $filename;
+
+		if (file_exists($path))
+		{
+			$path .= '-' . bin2hex(random_bytes(4));
+		}
+
+		if (!File::write($path, $data))
+		{
+			throw new RuntimeException('Unable to write the uploaded package file.', 500);
+		}
+
+		return $path;
+	}
+
+	private function downloadPackageFromUrl(string $url, string $tmpPath): string
+	{
+		$http     = HttpFactory::getHttp();
+		$response = $http->get($url);
+
+		if ((int) $response->code < 200 || (int) $response->code >= 300)
+		{
+			throw new RuntimeException('Unable to download the package file.', 400);
+		}
+
+		$pathPart = parse_url($url, PHP_URL_PATH) ?: '';
+		$filename = basename($pathPart);
+		$filename = File::makeSafe($filename);
+
+		if ($filename === '')
+		{
+			$filename = 'package.zip';
+		}
+
+		$tmpPath = rtrim($tmpPath, '/\\');
+		$path    = $tmpPath . '/' . $filename;
+
+		if (file_exists($path))
+		{
+			$path .= '-' . bin2hex(random_bytes(4));
+		}
+
+		if (!File::write($path, $response->body))
+		{
+			throw new RuntimeException('Unable to write the downloaded package file.', 500);
+		}
+
+		return $path;
+	}
+
+	private function respondInstall(object $result): void
+	{
+		$serializer = new JoomlaSerializer('extensioninstall');
+		$element    = (new Resource($result, $serializer))
+			->fields(array_keys((array) $result));
+
+		$this->app->getDocument()->setData($element);
+		$this->app->getDocument()->addLink('self', Uri::current());
+		$this->app->setHeader('status', 200);
+	}
+
+	private function failWithError(Throwable $e): void
+	{
+		$errorCode = $e->getCode() ?: 500;
+
+		$this->app->getDocument()->setErrors(
+			[
+				[
+					'title' => $e->getMessage(),
+					'code'  => $errorCode,
+				],
+			]
+		);
+
+		$this->app->setHeader('status', $errorCode);
 	}
 
 }
