@@ -9,6 +9,14 @@ Allows you to connect Joomla 4.x and 5.x sites to [Akeeba Panopticon](https://gi
 * (Optional) Akeeba Backup Professional 9.x — to enable backup features
 * (Optional) Admin Tools Professional 7.x — to enable security features
 
+## Configuration
+
+### Allow Remote Extension Installation
+
+The connector includes an option to allow or disallow remote extension installation from Panopticon. This option is found in the component's Options page (Components > Panopticon > Options).
+
+When set to **Yes** (the default), Panopticon can remotely install extensions on the site using the mass extension installation feature. When set to **No**, the site will refuse remote installation requests and report the status as "Disabled" in the installation summary.
+
 ## License
 
 Akeeba Panopticon Connector for Joomla! 4 and Joomla! 5

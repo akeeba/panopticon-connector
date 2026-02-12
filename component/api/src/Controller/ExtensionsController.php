@@ -12,8 +12,9 @@ defined('_JEXEC') || die;
 use Akeeba\Component\Panopticon\Api\Mixin\J6FixBrokenModelStateTrait;
 use Akeeba\Component\Panopticon\Api\Model\ExtensionsModel;
 use Joomla\CMS\Access\Exception\NotAllowed;
+use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
-use Joomla\CMS\Filesystem\File;
+use Joomla\Filesystem\File;
 use Joomla\CMS\Installer\Installer;
 use Joomla\CMS\Serializer\JoomlaSerializer;
 use Joomla\CMS\Uri\Uri;
@@ -91,6 +92,13 @@ class ExtensionsController extends ApiController
 			throw new NotAllowed($this->app->getLanguage()->_('JERROR_ALERTNOAUTHOR'), 403);
 		}
 
+		$params = ComponentHelper::getComponent('com_panopticon')->getParams();
+
+		if (!$params->get('allow_remote_install', 1))
+		{
+			throw new RuntimeException('Remote extension installation is disabled on this site.', 403);
+		}
+
 		$tmpPath = Factory::getApplication()->get('tmp_path');
 
 		if (empty($tmpPath) || !is_dir($tmpPath) || !is_writable($tmpPath))
@@ -100,6 +108,7 @@ class ExtensionsController extends ApiController
 
 		$method      = strtoupper($this->input->getMethod());
 		$packageFile = null;
+		$extractDir  = null;
 		try
 		{
 			if ($method === 'POST')
@@ -123,8 +132,32 @@ class ExtensionsController extends ApiController
 				throw new RuntimeException('Unsupported method.', 405);
 			}
 
+			// Unpack the package archive into a temporary directory
+			$extractDir = $tmpPath . '/install_' . bin2hex(random_bytes(8));
+
+			if (!@mkdir($extractDir, 0755, true) && !is_dir($extractDir))
+			{
+				throw new RuntimeException('Failed to create extraction directory.', 500);
+			}
+
+			$zip = new \ZipArchive();
+
+			if ($zip->open($packageFile) !== true)
+			{
+				throw new RuntimeException('Failed to open the extension package.', 500);
+			}
+
+			if (!$zip->extractTo($extractDir))
+			{
+				$zip->close();
+
+				throw new RuntimeException('Failed to extract the extension package.', 500);
+			}
+
+			$zip->close();
+
 			$installer = Installer::getInstance();
-			$installed = $installer->install($packageFile);
+			$installed = $installer->install($extractDir);
 
 			$result = (object) [
 				'id'       => 0,
@@ -140,9 +173,14 @@ class ExtensionsController extends ApiController
 		}
 		finally
 		{
-			if (!empty($packageFile) && is_string($packageFile) && is_file($packageFile))
+			if (!empty($extractDir) && is_dir($extractDir))
 			{
-				File::delete($packageFile);
+				$this->deleteDirectory($extractDir);
+			}
+
+			if (!empty($packageFile) && is_file($packageFile))
+			{
+				@unlink($packageFile);
 			}
 		}
 	}
@@ -225,6 +263,26 @@ class ExtensionsController extends ApiController
 		$this->app->getDocument()->setData($element);
 		$this->app->getDocument()->addLink('self', Uri::current());
 		$this->app->setHeader('status', 200);
+	}
+
+	private function deleteDirectory(string $dir): void
+	{
+		if (!is_dir($dir))
+		{
+			return;
+		}
+
+		$items = new \RecursiveIteratorIterator(
+			new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
+			\RecursiveIteratorIterator::CHILD_FIRST
+		);
+
+		foreach ($items as $item)
+		{
+			$item->isDir() ? @rmdir($item->getPathname()) : @unlink($item->getPathname());
+		}
+
+		@rmdir($dir);
 	}
 
 	private function failWithError(Throwable $e): void
