@@ -312,15 +312,6 @@ class CoreController extends ApiController
 
 		$db = Factory::getDbo();
 
-		// Create the table if it doesn't exist
-		$db->setQuery(
-			'CREATE TABLE IF NOT EXISTS ' . $db->quoteName('#__panopticon_coresums') . ' ('
-			. $db->quoteName('id') . ' INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, '
-			. $db->quoteName('path') . ' VARCHAR(1024) NOT NULL, '
-			. $db->quoteName('checksum') . ' VARCHAR(128) NOT NULL'
-			. ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
-		)->execute();
-
 		$db->truncateTable('#__panopticon_coresums');
 
 		$paths     = array_keys($checksums);

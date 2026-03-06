@@ -17,13 +17,8 @@
   </component>
   <component name="PhpIncludePathManager">
     <include_path>
-      <path value="$USER_HOME$/Sites/boot" />
-      <path value="$PROJECT_DIR$/../../master/joomla4--" />
-      <path value="$PROJECT_DIR$/component/backend/vendor/z4kn4fein/php-semver" />
       <path value="$PROJECT_DIR$/component/backend/vendor/composer" />
-      <path value="$USER_HOME$/Sites/boot4" />
-      <path value="/var/www/boot4" />
-      <path value="$PROJECT_DIR$/../../master/joomla4" />
+      <path value="$PROJECT_DIR$/component/backend/vendor/z4kn4fein/php-semver" />
       <path value="$PROJECT_DIR$/../../master/joomla5" />
       <path value="$USER_HOME$/Sites/boot5/configuration.php" />
     </include_path>

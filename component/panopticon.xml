@@ -18,6 +18,18 @@
     <description>COM_PANOPTICON_XML_DESCRIPTION</description>
     <namespace path="src">Akeeba\Component\Panopticon</namespace>
 
+    <install>
+        <sql>
+            <file driver="mysql" charset="utf8">sql/install.mysql.utf8.sql</file>
+        </sql>
+    </install>
+
+    <update>
+        <schemas>
+            <schemapath type="mysql">sql/updates/mysql</schemapath>
+        </schemas>
+    </update>
+
     <administration>
         <menu>COM_PANOPTICON</menu>
 
@@ -27,6 +39,7 @@
 
             <folder>language</folder>
             <folder>services</folder>
+            <folder>sql</folder>
             <folder>src</folder>
             <folder>tmpl</folder>
             <folder>vendor</folder>
