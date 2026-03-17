@@ -8,12 +8,20 @@ This is the connector component for [Akeeba Panopticon](https://github.com/akeeb
 `
 ## 🔎 Release highlights
 
-* **✨ Troubleshooting aid for API application errors when connecting a Panopticon site**. Have you ever tried to connect a site to Panopticon, only to receive an error saying the API application doesn't work? In almost every case it's a third party plugin which is written incorrectly so that it either breaks the API application outright, or is not fully compatible with the Joomla! or PHP version you're using. Until now, it was really hard figuring out which plugin was the problem, and how to contact its developer. Not any more! We introduced a new system plugin which automatically catches the error condition, identifies the offending plugin, and reports this information back to you when you try to connect a site to Panopticon, or using its Connection Doctor!
+* **✨ Remote extension installation**. Panopticon 2 will allow you to batch-install extensions across multiple sites. For this feature to work, you need to update to connector version 1.1.0 which provides the remote extension installation feature. 
 
 ## 🖥️ System Requirements
 
-* Joomla! 4.0, 4.1, 4.3, 4.3, 4.4, 5.0, and 5.1.
-* PHP versions 7.2, 7.3, 7.4, 8.0, 8.1, 8.2, and 8.3 (PHP 8.1 or later required for Joomla! 5)
+* Joomla! 4.0 to 6.1, inclusive.
+* PHP versions 7.2 to 8.5, inclusive.
+
+**Important notes on system requirements**
+
+PHP version compatibility refers to our connector, not Joomla! itself. PHP 8.1 or later required for Joomla! 5, PHP 8.3 or later required for Joomla! 6.
+
+Joomla! 6.1 is a beta version at the time of this writing. We expect the connector to work with the final version just fine, but we cannot guarantee it. If we discover any issues with the stable version of Joomla! 6.1, we will release a new version of the connector.
+
+Future versions of the connector will drop support for Joomla 5.3 and earlier versions. We strongly advise you to upgrade to Joomla! 5.4 or 6.x as soon as possible.
 
 ## 🧑🏽‍💻 Important note about the Joomla! API
 
@@ -29,9 +37,7 @@ If any of these plugins are disabled, _or if its Access is set to anything other
 
 ## 📋 CHANGELOG
 
-* ✏️ Warn the user if “Web Services - Installer” is not enabled.
-* ✏️ Option to disable system information collection.
-* ✨ Use Admin Tools Professional's Reset Joomla! Update feature (if available) to fix stuck core updates.
+* ✨ Remote extension installation
 
 Legend:
 * 🚨 Security update
