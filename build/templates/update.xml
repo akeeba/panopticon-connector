@@ -21,7 +21,7 @@
     <sha512>##HASH_SHA512##</sha512>
     <infourl title="Panopticon Connector for Joomla! 4 and Later Release Notes">https://github.com/akeeba/panopticon-connector/releases/##VERSION##</infourl>
 
-    <targetplatform name="joomla" version="((4\.(0|1|2|3|4))|(5\.(0)))"/>
+    <targetplatform name="joomla" version="((4\.(0|1|2|3|4))|(5\.(0|1|2|3|4)|(6\.(0|1|2|3|4))))"/>
 
     <php_minimum>7.2.5</php_minimum>
 
