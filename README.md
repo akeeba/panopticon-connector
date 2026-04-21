@@ -1,12 +1,12 @@
-# Akeeba Panopticon Connector for Joomla! 4 and Joomla! 5
+# Akeeba Panopticon Connector for Joomla! 4, 5, and 6
 
-Allows you to connect Joomla 4.x and 5.x sites to [Akeeba Panopticon](https://github.com/akeeba/panopticon).
+Allows you to connect Joomla 4.x, 5.x, and 6.x sites to [Akeeba Panopticon](https://github.com/akeeba/panopticon).
 
 ## Requirements
 
-* Joomla 4.0, 4.1, 4.2, 4.3, 4.4, or 5.0
-* PHP 7.2, 7.3, 7.4, 8.0, 8.1, 8.2, or 8.3
-* (Optional) Akeeba Backup Professional 9.x — to enable backup features
+* Joomla 4.x, 5.x, 6.x
+* PHP 7.2 through 8.5 inclusive
+* (Optional) Akeeba Backup Professional 9.x or 10.x — to enable backup features
 * (Optional) Admin Tools Professional 7.x — to enable security features
 
 ## Configuration
@@ -19,9 +19,9 @@ When set to **Yes** (the default), Panopticon can remotely install extensions on
 
 ## License
 
-Akeeba Panopticon Connector for Joomla! 4 and Joomla! 5
+Akeeba Panopticon Connector for Joomla! 4, 5, and 6
 
-Copyright (C) 2023-2025  Nikolaos Dionysopoulos / Akeeba Ltd
+Copyright (C) 2023-2026  Nikolaos Dionysopoulos / Akeeba Ltd
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
