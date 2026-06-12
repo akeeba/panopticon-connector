@@ -1,3 +1,7 @@
+# Akeeba Panopticon Connector for Joomla 4.x and 5.x version 1.1.1
+
+* ✨ Support a custom base URL for the Core File Integrity checksums source
+
 # Akeeba Panopticon Connector for Joomla 4.x and 5.x version 1.1.0
 
 * ✨ Remote extension installation

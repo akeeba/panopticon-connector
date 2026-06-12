@@ -276,7 +276,15 @@ class CoreController extends ApiController
 		}
 
 		$version = JVERSION;
-		$url     = "https://getpanopticon.com/checksums/joomla/{$version}/sha256_squash.json.gz";
+
+		$base = trim((string) $this->input->get('checksumsBaseUrl', '', 'raw'));
+
+		if ($base === '' || !preg_match('#^https?://#i', $base))
+		{
+			$base = 'https://getpanopticon.com/checksums';
+		}
+
+		$url = rtrim($base, '/') . "/joomla/{$version}/sha256_squash.json.gz";
 		$tmpFile = Factory::getApplication()->get('tmp_path') . '/sha256_squash.json.gz';
 
 		$options = new Registry();
