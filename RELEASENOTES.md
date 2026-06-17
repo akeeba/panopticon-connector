@@ -8,7 +8,7 @@ This is the connector component for [Akeeba Panopticon](https://github.com/akeeb
 `
 ## 🔎 Release highlights
 
-* **✨ Remote extension installation**. Panopticon 2 will allow you to batch-install extensions across multiple sites. For this feature to work, you need to update to connector version 1.1.0 which provides the remote extension installation feature. 
+* **🐞 Core updates fail on Joomla 5.1–5.2**. A PHP fatal error (`Call to undefined method Joomla\Filesystem\File::exists()`) caused the `core/update/activate` API endpoint to return HTTP 500 on sites running Joomla 5.1.x or 5.2.x. This blocked all Panopticon-initiated core updates on those versions. The method was removed in the `joomla/filesystem` library bundled with Joomla 5.0–5.2 and only restored in 5.3+. The fix replaces the removed wrapper with the equivalent native PHP `is_file()` call, which works across all supported Joomla versions.
 
 ## 🖥️ System Requirements
 
@@ -37,7 +37,8 @@ If any of these plugins are disabled, _or if its Access is set to anything other
 
 ## 📋 CHANGELOG
 
-* ✨ Remote extension installation
+* ✨ Support a custom base URL for the Core File Integrity checksums source
+* 🐞 Core updates fail with HTTP 500 on Joomla 5.1–5.2 due to removed `File::exists()` method
 
 Legend:
 * 🚨 Security update

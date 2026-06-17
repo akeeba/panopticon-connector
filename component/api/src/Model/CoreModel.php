@@ -440,7 +440,7 @@ ENDDATA;
 		}
 
 
-		if (File::exists($configpath))
+		if (is_file($configpath))
 		{
 			if (!File::delete($configpath))
 			{
@@ -489,12 +489,12 @@ ENDDATA;
 	{
 		$basePath = JPATH_ADMINISTRATOR . '/components/com_joomlaupdate';
 
-		if (File::exists($basePath . '/update.php'))
+		if (is_file($basePath . '/update.php'))
 		{
 			File::delete($basePath . '/update.php');
 		}
 
-		if (File::exists($basePath . '/restoration.php'))
+		if (is_file($basePath . '/restoration.php'))
 		{
 			File::delete($basePath . '/restoration.php');
 		}
@@ -529,25 +529,25 @@ ENDDATA;
 		}
 
 		// Remove the update.php file used in Joomla 4.0.3 and later.
-		if (File::exists($basePath . '/update.php'))
+		if (is_file($basePath . '/update.php'))
 		{
 			File::delete($basePath . '/update.php');
 		}
 
 		// Remove the legacy restoration.php file (when updating from Joomla 4.0.2 and earlier).
-		if (File::exists($basePath . '/restoration.php'))
+		if (is_file($basePath . '/restoration.php'))
 		{
 			File::delete($basePath . '/restoration.php');
 		}
 
 		// Remove the legacy restore_finalisation.php file used in Joomla 4.0.2 and earlier.
-		if (File::exists($basePath . '/restore_finalisation.php'))
+		if (is_file($basePath . '/restore_finalisation.php'))
 		{
 			File::delete($basePath . '/restore_finalisation.php');
 		}
 
 		// Remove joomla.xml from the site's root.
-		if (File::exists(JPATH_ROOT . '/joomla.xml'))
+		if (is_file(JPATH_ROOT . '/joomla.xml'))
 		{
 			File::delete(JPATH_ROOT . '/joomla.xml');
 		}

@@ -36,7 +36,7 @@ class CoreController extends ApiController
 		{
 			return parent::execute($task);
 		}
-		catch (\RuntimeException $e)
+		catch (\Throwable $e)
 		{
 			$this->failWithError($e);
 		}
