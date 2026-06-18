@@ -50,8 +50,18 @@
         <languages folder="backend">
             <language tag="de-DE">language/de-DE/com_panopticon.ini</language>
             <language tag="de-DE">language/de-DE/com_panopticon.sys.ini</language>
+            <language tag="el-GR">language/el-GR/com_panopticon.ini</language>
+            <language tag="el-GR">language/el-GR/com_panopticon.sys.ini</language>
             <language tag="en-GB">language/en-GB/com_panopticon.ini</language>
             <language tag="en-GB">language/en-GB/com_panopticon.sys.ini</language>
+            <language tag="es-ES">language/es-ES/com_panopticon.ini</language>
+            <language tag="es-ES">language/es-ES/com_panopticon.sys.ini</language>
+            <language tag="fr-FR">language/fr-FR/com_panopticon.ini</language>
+            <language tag="fr-FR">language/fr-FR/com_panopticon.sys.ini</language>
+            <language tag="it-IT">language/it-IT/com_panopticon.ini</language>
+            <language tag="it-IT">language/it-IT/com_panopticon.sys.ini</language>
+            <language tag="pt-PT">language/pt-PT/com_panopticon.ini</language>
+            <language tag="pt-PT">language/pt-PT/com_panopticon.sys.ini</language>
         </languages>
     </administration>
 
