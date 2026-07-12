@@ -14,6 +14,13 @@
 /build/override.properties
 /release
 
+### Planning & test artifacts
+/.plans
+/tests/integration/docker/www
+/tests/integration/inbox
+/tests/integration/docker/.env
+/tests/integration/config.php
+
 ### Private files
 /assets/phpstorm_http/http-client.private.env.json
 

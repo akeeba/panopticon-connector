@@ -1,0 +1,51 @@
+# Apache + PHP LAMP image for the Panopticon Connector integration harness.
+#
+# A single container serves the Joomla site (mod_php, not FPM) and doubles as
+# the CLI environment `run-tests.sh` uses (via `docker compose exec web ...`)
+# to acquire/install Joomla, build/install the connector, mint API tokens and
+# run PHPUnit itself (phpunit-11.phar is baked in below).
+
+ARG PHP_VERSION=8.3
+FROM php:${PHP_VERSION}-apache
+
+# mlocati's installer resolves the correct extension build for the base image.
+ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+RUN chmod +x /usr/local/bin/install-php-extensions && \
+    install-php-extensions \
+      pdo_mysql \
+      mysqli \
+      gd \
+      intl \
+      zip \
+      curl \
+      mbstring \
+      xml \
+      zlib \
+      bz2 \
+      soap
+
+# Apache: Joomla needs mod_rewrite for SEF URLs / .htaccess.
+RUN a2enmod rewrite
+
+# CLI tooling used by run-tests.sh / lib.sh when run inside this container
+# (Joomla version resolution, package handling, DB access).
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      unzip \
+      curl \
+      jq \
+      gzip \
+      default-mysql-client \
+      rsync \
+ && rm -rf /var/lib/apt/lists/*
+
+# Composer (only needed if the connector's own build ever needs it inside the
+# container; the actual `phing git` build normally runs on the host).
+COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
+
+# PHPUnit 11 phar — no PHPUnit dependency is added to composer.json because
+# component/backend/vendor/ is shipped inside the Joomla extension package.
+ADD https://phar.phpunit.de/phpunit-11.phar /usr/local/bin/phpunit
+RUN chmod +x /usr/local/bin/phpunit
+
+COPY php.ini /usr/local/etc/php/conf.d/zz-panopticon-itest.ini

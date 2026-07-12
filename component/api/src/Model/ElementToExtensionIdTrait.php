@@ -55,7 +55,7 @@ trait ElementToExtensionIdTrait
 		}
 	}
 
-	private function extensionNameToCriteria(string $extensionName): array
+	protected static function extensionNameToCriteria(string $extensionName): array
 	{
 		$parts = explode('_', $extensionName, 3);
 

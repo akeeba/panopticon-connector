@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.4/phpunit.xsd"
+         bootstrap="tests/integration/bootstrap.php"
+         processIsolation="false"
+         cacheResult="false"
+         failOnWarning="false"
+         failOnNotice="false"
+         failOnDeprecation="false"
+         beStrictAboutOutputDuringTests="false"
+         beStrictAboutChangesToGlobalState="false"
+         colors="true"
+         defaultTestSuite="integration"
+>
+    <testsuites>
+        <testsuite name="integration">
+            <directory>tests/integration/src/Tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <!--
+        These tests are plain HTTP clients driving a real Joomla + Panopticon Connector
+        install running in Docker (see tests/integration/run-tests.sh). No Joomla is
+        booted in-process, so the strict flags used by the unit suite (phpunit.xml) are
+        relaxed here to tolerate the target site's own warnings/deprecations.
+    -->
+</phpunit>

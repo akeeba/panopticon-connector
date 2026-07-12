@@ -1,0 +1,50 @@
+# Dockerized throwaway LAMP stack for the Panopticon Connector integration tests.
+#
+# All versions are configurable through the .env file (see env.dist). Do not
+# run this by hand — use ../run-tests.sh, which resolves/acquires Joomla,
+# builds and installs the connector, mints an API token and drives PHPUnit
+# inside the `web` container. This file only describes the services.
+
+name: panopticon-connector-itest
+
+services:
+  db:
+    image: ${DB_IMAGE:-mariadb:11.4}
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpw}
+      MARIADB_DATABASE: ${DB_NAME:-joomla_test}
+    tmpfs:
+      # Ephemeral storage: the DB is rebuilt clean on every `up`. Fast, no residue.
+      - /var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
+      interval: 3s
+      timeout: 5s
+      retries: 40
+      start_period: 5s
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+      args:
+        PHP_VERSION: "${PHP_VERSION:-8.3}"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      # Joomla itself, acquired/extracted by run-tests.sh on the host.
+      - ./www:/var/www/html
+      # The connector repo root, so /app/phpunit-integration.xml, /app/tests
+      # and /app/release/*.zip are all visible inside the container.
+      - ../../..:/app
+    working_dir: /var/www/html
+    environment:
+      JTEST_DB_HOST: db
+      JTEST_DB_PORT: "3306"
+      JTEST_DB_USER: ${DB_USER:-root}
+      JTEST_DB_PASSWORD: ${DB_PASSWORD:-rootpw}
+      JTEST_DB_NAME: ${DB_NAME:-joomla_test}
+      JTEST_DB_PREFIX: ${DB_PREFIX:-jtest_}
+    ports:
+      - "${WEB_PORT:-8080}:80"

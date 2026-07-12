@@ -165,7 +165,26 @@ class ServerInfo
 			return null;
 		}
 
-		foreach ($output as $line)
+		return $this->parseFreeOutput($output);
+	}
+
+	/**
+	 * Parses the output of the `free -m` command.
+	 *
+	 * @param   array|string  $lines  The output of `free -m`, either as an array of lines (as returned by `exec()`)
+	 *                                or as a single string with the lines separated by newlines.
+	 *
+	 * @return  array|null
+	 * @since   2.0.0
+	 */
+	protected function parseFreeOutput($lines): ?array
+	{
+		if (is_string($lines))
+		{
+			$lines = preg_split('/\r\n|\r|\n/', $lines) ?: [];
+		}
+
+		foreach ($lines as $line)
 		{
 			$line = trim($line);
 
@@ -204,13 +223,26 @@ class ServerInfo
 			return null;
 		}
 
+		return $this->parseLoad($output[0]);
+	}
+
+	/**
+	 * Parses a single line of `uptime` output.
+	 *
+	 * @param   string  $output  The (first, and only relevant) line of `uptime` output.
+	 *
+	 * @return  array|null
+	 * @since   2.0.0
+	 */
+	protected function parseLoad(string $output): ?array
+	{
 		// Samples:
 		// 17:39:11 up  3:43,  6 users,  load average: 0.18, 0.22, 0.35
 		// 15:40:51 up 33 days, 22:04,  1 user,  load average: 3.05, 2.44, 2.37
 		// 15:40:51 up 1 day,  1:40,  2 users,  load average: 3.13, 1.77, 1.45
 
 		// Get the uptime in minutes
-		$line = trim($output[0]);
+		$line = trim($output);
 		[, $uptime] = explode(' up ', $line);
 		if (preg_match('#(.*),\s+\d+\s+user#U', $uptime, $matches))
 		{
@@ -268,7 +300,7 @@ class ServerInfo
 	 * @return  int
 	 * @since   1.1.0
 	 */
-	private function uptimeToMinutes(string $uptime): int
+	protected function uptimeToMinutes(string $uptime): int
 	{
 		$total = 0;
 		$parts = explode(',', $uptime);
@@ -332,11 +364,32 @@ class ServerInfo
 			return null;
 		}
 
-		$lines = @file('/proc/stat');
+		$content = @file_get_contents('/proc/stat');
 
-		if ($lines === false)
+		if ($content === false)
 		{
 			return null;
+		}
+
+		return $this->parseProcStat($content);
+	}
+
+	/**
+	 * Parses the contents of `/proc/stat`.
+	 *
+	 * @param   string  $content  The raw contents of `/proc/stat`.
+	 *
+	 * @return  float[]|null
+	 * @since   2.0.0
+	 */
+	protected function parseProcStat(string $content): ?array
+	{
+		$lines = explode("\n", $content);
+
+		// `file()` does not return a spurious empty trailing element for content ending in a newline; explode() does.
+		if ($lines !== [] && end($lines) === '')
+		{
+			array_pop($lines);
 		}
 
 		$lines = array_filter(
@@ -351,6 +404,7 @@ class ServerInfo
 			return null;
 		}
 
+		$lines  = array_values($lines);
 		$line   = $lines[0];
 		$parts  = explode(' ', $line);
 		$parts  = array_filter(
@@ -391,11 +445,26 @@ class ServerInfo
 			return null;
 		}
 
+		return $this->parseTopCpu(implode("\n", $output));
+	}
+
+	/**
+	 * Parses the output of `top`.
+	 *
+	 * @param   string  $output  The output of `top`, as a single string with lines separated by newlines.
+	 *
+	 * @return  float[]|null
+	 * @since   2.0.0
+	 */
+	protected function parseTopCpu(string $output): ?array
+	{
+		$lines = explode("\n", $output);
+
 		$user   = null;
 		$system = null;
 		$idle   = null;
 
-		foreach ($output as $line)
+		foreach ($lines as $line)
 		{
 			// macOS / BSD format
 			if (str_starts_with($line, 'CPU usage:'))
@@ -503,6 +572,21 @@ class ServerInfo
 			return null;
 		}
 
+		return $this->parseMemoryPressure(implode("\n", $output));
+	}
+
+	/**
+	 * Parses the output of `memory_pressure` (macOS / Darwin).
+	 *
+	 * @param   string  $output  The output of `memory_pressure`, as a single string with lines separated by newlines.
+	 *
+	 * @return  array|null
+	 * @since   2.0.0
+	 */
+	protected function parseMemoryPressure(string $output): ?array
+	{
+		$output = explode("\n", $output);
+
 		// First, find the page size; it's different on x86_64 and Apple Silicon.
 		$pageSize = 0;
 		$total    = 0;
@@ -592,7 +676,7 @@ class ServerInfo
 	 */
 	private function getOSFromFile(): ?string
 	{
-		if (!function_exists('parse_ini_file'))
+		if (!function_exists('parse_ini_string'))
 		{
 			return null;
 		}
@@ -610,21 +694,48 @@ class ServerInfo
 				continue;
 			}
 
-			$parsed = parse_ini_file($file, false, INI_SCANNER_RAW);
+			$content = @file_get_contents($file);
 
-			$prettyName = $parsed['PRETTY_NAME'] ?? null;
-			$name       = $parsed['NAME'] ?? null;
-			$version    = $parsed['VERSION'] ?? null;
+			if ($content === false)
+			{
+				continue;
+			}
 
-			$altPrettyName = trim(($name ?? '') . ' ' . ($version ?? ''));
-			$ret           = $prettyName ?? $altPrettyName;
-			$ret           = empty($ret) ? null : $ret;
+			$ret = $this->parseOsRelease($content);
 
 			if ($ret !== null)
 			{
 				break;
 			}
 		}
+
+		return $ret;
+	}
+
+	/**
+	 * Parses the contents of an `os-release` file (e.g. `/etc/os-release`).
+	 *
+	 * @param   string  $content  The raw contents of the `os-release` file.
+	 *
+	 * @return  string|null
+	 * @since   2.0.0
+	 */
+	protected function parseOsRelease(string $content): ?string
+	{
+		$parsed = parse_ini_string($content, false, INI_SCANNER_RAW);
+
+		if ($parsed === false)
+		{
+			return null;
+		}
+
+		$prettyName = $parsed['PRETTY_NAME'] ?? null;
+		$name       = $parsed['NAME'] ?? null;
+		$version    = $parsed['VERSION'] ?? null;
+
+		$altPrettyName = trim(($name ?? '') . ' ' . ($version ?? ''));
+		$ret           = $prettyName ?? $altPrettyName;
+		$ret           = empty($ret) ? null : $ret;
 
 		return $ret;
 	}
@@ -730,7 +841,20 @@ class ServerInfo
 			return [null, null, null];
 		}
 
-		$line = preg_replace('#\s+#', ' ', $output[1]);
+		return $this->parseDiskFreeOutput($output[1]);
+	}
+
+	/**
+	 * Parses the second line of the output of `df -P -m`.
+	 *
+	 * @param   string  $output  The second line of `df -P -m` output (the one with the actual figures).
+	 *
+	 * @return  array|null[]
+	 * @since   2.0.0
+	 */
+	protected function parseDiskFreeOutput(string $output): array
+	{
+		$line = preg_replace('#\s+#', ' ', $output);
 		[$deviceNode, $total, $used, $free, $capacity, $mount] = explode(' ', $line);
 
 		return [$mount, $free, $total];
@@ -742,7 +866,7 @@ class ServerInfo
 	 * @return  string
 	 * @since   1.1.0
 	 */
-	private function getOSFamily(): string
+	protected function getOSFamily(): string
 	{
 		if (DIRECTORY_SEPARATOR === '\\')
 		{

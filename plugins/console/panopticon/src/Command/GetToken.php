@@ -175,13 +175,22 @@ class GetToken extends AbstractCommand implements DatabaseAwareInterface
 			return '';
 		}
 
-		$algorithm = 'sha256';
-		$userId    = $user->id;
-		$rawToken  = base64_decode($tokenSeed);
-		$tokenHash = hash_hmac($algorithm, $rawToken, $siteSecret);
-		$message   = base64_encode("$algorithm:$userId:$tokenHash");
+		return self::computeApiToken($user->id, $tokenSeed, $siteSecret);
+	}
 
-		return $message;
+	/**
+	 * Computes the Panopticon API token for a given user ID, token seed, and site secret.
+	 *
+	 * @param   int     $userId      The user ID the token is being generated for.
+	 * @param   string  $tokenSeed   The (base64-encoded) random token seed stored in the user's profile.
+	 * @param   string  $siteSecret  The site's secret (Joomla's `secret` configuration value).
+	 *
+	 * @return  string  The API token.
+	 * @since   2.0.0
+	 */
+	public static function computeApiToken(int $userId, string $tokenSeed, string $siteSecret): string
+	{
+		return base64_encode('sha256:' . $userId . ':' . hash_hmac('sha256', base64_decode($tokenSeed), $siteSecret));
 	}
 
 	/**

@@ -10,6 +10,7 @@ namespace Akeeba\Component\Panopticon\Api\Model;
 defined('_JEXEC') || die;
 
 use Akeeba\Component\Panopticon\Api\Library\ServerInfo;
+use Akeeba\Component\Panopticon\Api\Library\VersionStability;
 use Exception;
 use Joomla\CMS\Cache\CacheControllerFactoryInterface;
 use Joomla\CMS\Component\ComponentHelper;
@@ -81,9 +82,9 @@ class CoreModel extends UpdateModel
 		$jVersion   = new Version();
 		$updateInfo = (object) [
 			'current'             => $jVersion->getShortVersion(),
-			'currentStability'    => $this->detectStability($jVersion->getShortVersion()),
+			'currentStability'    => VersionStability::detectStability($jVersion->getShortVersion()),
 			'latest'              => $jVersion->getShortVersion(),
-			'latestStability'     => $this->detectStability($jVersion->getShortVersion()),
+			'latestStability'     => VersionStability::detectStability($jVersion->getShortVersion()),
 			'needsUpdate'         => false,
 			'details'             => null,
 			'info'                => null,
@@ -91,7 +92,7 @@ class CoreModel extends UpdateModel
 			'extensionAvailable'  => true,
 			'updateSiteAvailable' => true,
 			'maxCacheHours'       => $cacheHours,
-			'minimumStability'    => $this->stabilityToString($minimumStability),
+			'minimumStability'    => VersionStability::stabilityToString($minimumStability),
 			'updateSiteUrl'       => null,
 			'lastUpdateTimestamp' => null,
 			'phpVersion'          => PHP_VERSION,
@@ -193,7 +194,7 @@ class CoreModel extends UpdateModel
 		if (is_object($latest))
 		{
 			$updateInfo->latest          = $latest->version;
-			$updateInfo->latestStability = $this->detectStability($latest->version);
+			$updateInfo->latestStability = VersionStability::detectStability($latest->version);
 			$updateInfo->details         = $latest->detailsurl;
 			$updateInfo->info            = $latest->infourl;
 			$updateInfo->changelog       = $latest->changelogurl;
@@ -1116,56 +1117,6 @@ ENDDATA;
 		{
 			// Swallow the exception.
 		}
-	}
-
-	private function stabilityToString(int $stability): string
-	{
-		switch ($stability)
-		{
-			case 0:
-				return "dev";
-
-			case 1:
-				return "alpha";
-
-			case 2:
-				return "beta";
-
-			case 3:
-				return "rc";
-
-			case 4:
-			default:
-				return "stable";
-		}
-	}
-
-	private function detectStability(string $versionString): string
-	{
-		$version = \z4kn4fein\SemVer\Version::parse($versionString, false);
-		$tag     = strtolower($version->getPreRelease() ?: '');
-
-		if ($tag === '')
-		{
-			return 'stable';
-		}
-
-		if (strpos($tag, 'alpha') === 0)
-		{
-			return 'alpha';
-		}
-
-		if (strpos($tag, 'beta') === 0)
-		{
-			return 'beta';
-		}
-
-		if (strpos($tag, 'rc') === 0)
-		{
-			return 'rc';
-		}
-
-		return 'dev';
 	}
 
 	private function saveComponentParameters(string $component, Registry $params): void
