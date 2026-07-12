@@ -128,7 +128,7 @@ class UpdatesitesController extends ApiController
 		}
 
 		$item = $model->getItem($recordKey);
-		$data = array_merge($item->getProperties(), $data);
+		$data = array_merge((array) $item, $data);
 
 		// We have to STRIP the prefix and suffix, because Joomla's base model adds it back (I know, right?!)
 		if (isset($data['extra_query']) && !empty($data['extra_query']))
