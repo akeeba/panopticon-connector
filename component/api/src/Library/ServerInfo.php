@@ -274,7 +274,10 @@ class ServerInfo
 			return null;
 		}
 
-		$temp = preg_replace('#\s+#', ',', trim($temp));
+		// The values are separated by ", " (comma + space). Collapse any run of
+		// whitespace and/or commas into a single comma so we do not create empty
+		// fields (which would drop the 15-minute average).
+		$temp = preg_replace('#[\s,]+#', ',', trim($temp));
 		$parts = explode(',', $temp);
 
 		if (count($parts) < 3)
@@ -395,7 +398,7 @@ class ServerInfo
 		$lines = array_filter(
 			$lines,
 			function ($x) {
-				return str_starts_with('cpu ', $x);
+				return str_starts_with($x, 'cpu ');
 			}
 		);
 
@@ -412,6 +415,10 @@ class ServerInfo
 			return is_numeric($x);
 		}
 		);
+		// Reindex: the aggregate "cpu" line is padded with a double space, so explode()
+		// yields an empty element and array_filter() preserves the original (shifted) keys.
+		// Without this the positional reads below would land on the wrong columns.
+		$parts  = array_values($parts);
 		$parts  = array_map('intval', $parts);
 		$user   = ($parts[0] ?? 0) + ($parts[1] ?? 0);
 		$idle   = $parts[3] ?? 0;

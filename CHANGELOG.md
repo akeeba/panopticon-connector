@@ -3,6 +3,8 @@
 * ✨ Add machine translations for `de-DE`, `el-GR`, `es-ES`, `fr-FR`, `it-IT`, and `pt-PT`
 * ✨ Support a custom base URL for the Core File Integrity checksums source
 * 🐞 Core updates fail with HTTP 500 on Joomla 5.1–5.2 due to removed `File::exists()` method [#26]
+* 🐞 System information reported the CPU load averages incorrectly (empty 5-minute value, wrong 15-minute value)
+* 🐞 System information never reported Linux CPU usage from `/proc/stat`
 
 # Akeeba Panopticon Connector for Joomla 4.x and 5.x version 1.1.0
 

@@ -174,30 +174,23 @@ TXT;
 
 	// ---------------------------------------------------------------------------------------------
 	// parseLoad() — `uptime`
-	//
-	// NOTE: production `parseLoad()` has a pre-existing bug (present before this refactor, preserved
-	// here verbatim): `preg_replace('#\s+#', ',', trim($temp))` turns the ", " between load average
-	// figures into TWO commas (the existing "," plus the replaced " "), which shifts the 3-element
-	// destructuring: `load5` always comes out empty, and the real 15-minute figure is silently
-	// dropped. These tests document the actual (buggy) behaviour; see the accompanying report for the
-	// underlying bug, which is out of scope for this behaviour-preserving refactor.
 	// ---------------------------------------------------------------------------------------------
 
 	public static function loadProvider(): iterable
 	{
 		yield 'a few hours uptime' => [
 			'17:39:11 up  3:43,  6 users,  load average: 0.18, 0.22, 0.35',
-			['uptime' => 223, 'load1' => '0.18', 'load5' => '', 'load15' => '0.22'],
+			['uptime' => 223, 'load1' => '0.18', 'load5' => '0.22', 'load15' => '0.35'],
 		];
 
 		yield '33 days uptime' => [
 			'15:40:51 up 33 days, 22:04,  1 user,  load average: 3.05, 2.44, 2.37',
-			['uptime' => 48844, 'load1' => '3.05', 'load5' => '', 'load15' => '2.44'],
+			['uptime' => 48844, 'load1' => '3.05', 'load5' => '2.44', 'load15' => '2.37'],
 		];
 
 		yield '1 day uptime' => [
 			'15:40:51 up 1 day,  1:40,  2 users,  load average: 3.13, 1.77, 1.45',
-			['uptime' => 1540, 'load1' => '3.13', 'load5' => '', 'load15' => '1.77'],
+			['uptime' => 1540, 'load1' => '3.13', 'load5' => '1.77', 'load15' => '1.45'],
 		];
 	}
 
@@ -214,40 +207,52 @@ TXT;
 
 	// ---------------------------------------------------------------------------------------------
 	// parseProcStat() — Linux `/proc/stat`
-	//
-	// NOTE: production `parseProcStat()` also has a pre-existing bug (preserved here verbatim): the
-	// filter callback is `str_starts_with('cpu ', $x)` — the arguments are swapped, so it actually
-	// checks whether the literal string "cpu " starts with the (much longer) line `$x`, which is
-	// false for any real line of `/proc/stat`. In practice this means the method always returns null
-	// against real content, and ServerInfo::__invoke() silently falls back to `top` for CPU stats on
-	// Linux. These tests document that actual (buggy, always-null) behaviour.
 	// ---------------------------------------------------------------------------------------------
 
 	public static function procStatProvider(): iterable
 	{
+		// The aggregate "cpu" line is: user nice system idle iowait irq softirq steal guest guest_nice.
+		// The parser reports user (= user + nice), idle, iowait and a lumped "system" (= everything
+		// else), each as a percentage of the total.
 		yield 'realistic multi-line /proc/stat, trailing newline' => [
 			"cpu  130216 19926 7699652 1191821 3846 0 986 0 0 0\n"
 			. "cpu0 16277 2491 962456 148977 480 0 123 0 0 0\n"
 			. "intr 1234567 0 0 0\nctxt 987654321\nbtime 1700000000\nprocesses 123456\n",
+			['user' => 1.659696, 'system' => 85.123399, 'iowait' => 0.042514, 'idle' => 13.174390],
 		];
 
 		yield 'realistic multi-line /proc/stat, no trailing newline' => [
 			"cpu  130216 19926 7699652 1191821 3846 0 986 0 0 0\ncpu0 16277 2491 962456 148977 480 0 123 0 0 0",
+			['user' => 1.659696, 'system' => 85.123399, 'iowait' => 0.042514, 'idle' => 13.174390],
 		];
 
 		yield 'a single cpu line only' => [
 			'cpu  1 2 3 4 5 6 7 8 9 10',
-		];
-
-		yield 'empty content' => [
-			'',
+			['user' => 5.454545, 'system' => 78.181818, 'iowait' => 9.090909, 'idle' => 7.272727],
 		];
 	}
 
 	#[DataProvider('procStatProvider')]
-	public function testParseProcStatAlwaysReturnsNullDueToExistingFilterBug(string $content): void
+	public function testParseProcStat(string $content, array $expected): void
 	{
-		$this->assertNull($this->serverInfo->callParseProcStat($content));
+		$actual = $this->serverInfo->callParseProcStat($content);
+
+		$this->assertIsArray($actual);
+		$this->assertSame(['user', 'system', 'iowait', 'idle'], array_keys($actual));
+
+		foreach ($expected as $key => $value)
+		{
+			$this->assertEqualsWithDelta($value, $actual[$key], 0.0001, "CPU stat '$key' is off");
+		}
+
+		// The four figures partition 100% of CPU time.
+		$this->assertEqualsWithDelta(100.0, array_sum($actual), 0.0001);
+	}
+
+	public function testParseProcStatWithoutACpuLineReturnsNull(): void
+	{
+		$this->assertNull($this->serverInfo->callParseProcStat(''));
+		$this->assertNull($this->serverInfo->callParseProcStat("intr 1234567 0 0 0\nctxt 987654321\n"));
 	}
 
 	// ---------------------------------------------------------------------------------------------
