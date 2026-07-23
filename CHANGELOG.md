@@ -6,6 +6,7 @@
 * 🐞 System information reported the CPU load averages incorrectly (empty 5-minute value, wrong 15-minute value)
 * 🐞 System information never reported Linux CPU usage from `/proc/stat`
 * 🐞 Editing an update site through the API failed with HTTP 500
+* 🐞 Remote extension installation from a URL failed with HTTP 500 on PHP 8+ (non-static call to `HttpFactory::getHttp()`) [#27]
 
 # Akeeba Panopticon Connector for Joomla 4.x and 5.x version 1.1.0
 

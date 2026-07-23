@@ -221,7 +221,7 @@ class ExtensionsController extends ApiController
 
 	private function downloadPackageFromUrl(string $url, string $tmpPath): string
 	{
-		$http     = HttpFactory::getHttp();
+		$http     = (new HttpFactory())->getHttp();
 		$response = $http->get($url);
 
 		if ((int) $response->code < 200 || (int) $response->code >= 300)
