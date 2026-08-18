@@ -11,6 +11,7 @@ defined('_JEXEC') || die;
 
 use Akeeba\Component\Panopticon\Api\Library\ServerInfo;
 use Akeeba\Component\Panopticon\Api\Library\VersionStability;
+use Akeeba\Component\Panopticon\Api\Mixin\HttpResponseCompatibilityTrait;
 use Exception;
 use Joomla\CMS\Cache\CacheControllerFactoryInterface;
 use Joomla\CMS\Component\ComponentHelper;
@@ -35,6 +36,8 @@ use Throwable;
 
 class CoreModel extends UpdateModel
 {
+	use HttpResponseCompatibilityTrait;
+
 	private const DEBUG_CHUNKED_DOWNLOAD = false;
 
 	private $coreExtensionID = null;
@@ -599,7 +602,7 @@ ENDDATA;
 						$http     = (new HttpFactory())->getHttp($httpOption);
 						$response = $http->head($url);
 
-						if ($response->getStatusCode() != 200)
+						if ($this->getResponseStatusCode($response) != 200)
 						{
 							return -1;
 						}
@@ -753,12 +756,12 @@ ENDDATA;
 					]
 				);
 
-				if ($response->getStatusCode() != 200 && $response->getStatusCode() != 206)
+				if ($this->getResponseStatusCode($response) != 200 && $this->getResponseStatusCode($response) != 206)
 				{
-					throw new RuntimeException(sprintf('Invalid HTTP response code: %d', $response->getStatusCode()));
+					throw new RuntimeException(sprintf('Invalid HTTP response code: %d', $this->getResponseStatusCode($response)));
 				}
 
-				$chunk = $response->getBody();
+				$chunk = $this->getResponseBody($response);
 
 				if (empty($chunk))
 				{
@@ -945,7 +948,7 @@ ENDDATA;
 			return null;
 		}
 
-		if ($response->getStatusCode() !== 200)
+		if ($this->getResponseStatusCode($response) !== 200)
 		{
 			return null;
 		}
@@ -953,7 +956,7 @@ ENDDATA;
 		// Use SimpleXML to parse the raw XML data
 		try
 		{
-			$xml = new \SimpleXMLElement((string) $response->getBody());
+			$xml = new \SimpleXMLElement($this->getResponseBody($response));
 		}
 		catch (Exception $e)
 		{

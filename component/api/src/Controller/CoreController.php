@@ -9,6 +9,7 @@ namespace Akeeba\Component\Panopticon\Api\Controller;
 
 defined('_JEXEC') || die;
 
+use Akeeba\Component\Panopticon\Api\Mixin\HttpResponseCompatibilityTrait;
 use Akeeba\Component\Panopticon\Api\Mixin\J6FixBrokenModelStateTrait;
 use Akeeba\Component\Panopticon\Api\Model\CoreModel;
 use Joomla\CMS\Access\Exception\NotAllowed;
@@ -25,6 +26,7 @@ use Tobscure\JsonApi\Resource;
 class CoreController extends ApiController
 {
 	use J6FixBrokenModelStateTrait;
+	use HttpResponseCompatibilityTrait;
 
 	protected $contentType = 'coreupdate';
 
@@ -292,12 +294,12 @@ class CoreController extends ApiController
 		$http     = (new HttpFactory)->getHttp($options);
 		$response = $http->get($url);
 
-		if ($response->getStatusCode() !== 200)
+		if ($this->getResponseStatusCode($response) !== 200)
 		{
-			throw new \RuntimeException("Could not download checksums from $url (HTTP " . $response->getStatusCode() . ")");
+			throw new \RuntimeException("Could not download checksums from $url (HTTP " . $this->getResponseStatusCode($response) . ")");
 		}
 
-		$body = (string) $response->getBody();
+		$body = $this->getResponseBody($response);
 		file_put_contents($tmpFile, $body);
 
 		$gzContent = gzdecode($body);

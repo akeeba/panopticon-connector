@@ -9,6 +9,7 @@ namespace Akeeba\Component\Panopticon\Api\Controller;
 
 defined('_JEXEC') || die;
 
+use Akeeba\Component\Panopticon\Api\Mixin\HttpResponseCompatibilityTrait;
 use Akeeba\Component\Panopticon\Api\Mixin\J6FixBrokenModelStateTrait;
 use Akeeba\Component\Panopticon\Api\Model\ExtensionsModel;
 use Joomla\CMS\Access\Exception\NotAllowed;
@@ -28,6 +29,7 @@ use Tobscure\JsonApi\Resource;
 class ExtensionsController extends ApiController
 {
 	use J6FixBrokenModelStateTrait;
+	use HttpResponseCompatibilityTrait;
 
 	protected $contentType = 'extensions';
 
@@ -224,7 +226,7 @@ class ExtensionsController extends ApiController
 		$http     = (new HttpFactory())->getHttp();
 		$response = $http->get($url);
 
-		if ((int) $response->getStatusCode() < 200 || (int) $response->getStatusCode() >= 300)
+		if ($this->getResponseStatusCode($response) < 200 || $this->getResponseStatusCode($response) >= 300)
 		{
 			throw new RuntimeException('Unable to download the package file.', 400);
 		}
@@ -246,7 +248,7 @@ class ExtensionsController extends ApiController
 			$path .= '-' . bin2hex(random_bytes(4));
 		}
 
-		if (!File::write($path, (string) $response->getBody()))
+		if (!File::write($path, $this->getResponseBody($response)))
 		{
 			throw new RuntimeException('Unable to write the downloaded package file.', 500);
 		}
