@@ -599,7 +599,7 @@ ENDDATA;
 						$http     = (new HttpFactory())->getHttp($httpOption);
 						$response = $http->head($url);
 
-						if ($response->code != 200)
+						if ($response->getStatusCode() != 200)
 						{
 							return -1;
 						}
@@ -753,9 +753,9 @@ ENDDATA;
 					]
 				);
 
-				if ($response->code != 200 && $response->code != 206)
+				if ($response->getStatusCode() != 200 && $response->getStatusCode() != 206)
 				{
-					throw new RuntimeException(sprintf('Invalid HTTP response code: %d', $response->code));
+					throw new RuntimeException(sprintf('Invalid HTTP response code: %d', $response->getStatusCode()));
 				}
 
 				$chunk = $response->getBody();
@@ -945,7 +945,7 @@ ENDDATA;
 			return null;
 		}
 
-		if ($response->code !== 200)
+		if ($response->getStatusCode() !== 200)
 		{
 			return null;
 		}
@@ -953,7 +953,7 @@ ENDDATA;
 		// Use SimpleXML to parse the raw XML data
 		try
 		{
-			$xml = new \SimpleXMLElement($response->body);
+			$xml = new \SimpleXMLElement((string) $response->getBody());
 		}
 		catch (Exception $e)
 		{

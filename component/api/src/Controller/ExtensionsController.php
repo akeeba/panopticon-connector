@@ -224,7 +224,7 @@ class ExtensionsController extends ApiController
 		$http     = (new HttpFactory())->getHttp();
 		$response = $http->get($url);
 
-		if ((int) $response->code < 200 || (int) $response->code >= 300)
+		if ((int) $response->getStatusCode() < 200 || (int) $response->getStatusCode() >= 300)
 		{
 			throw new RuntimeException('Unable to download the package file.', 400);
 		}
@@ -246,7 +246,7 @@ class ExtensionsController extends ApiController
 			$path .= '-' . bin2hex(random_bytes(4));
 		}
 
-		if (!File::write($path, $response->body))
+		if (!File::write($path, (string) $response->getBody()))
 		{
 			throw new RuntimeException('Unable to write the downloaded package file.', 500);
 		}
