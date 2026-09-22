@@ -47,4 +47,4 @@ services:
       JTEST_DB_NAME: ${DB_NAME:-joomla_test}
       JTEST_DB_PREFIX: ${DB_PREFIX:-jtest_}
     ports:
-      - "${WEB_PORT:-8080}:80"
+      - "127.0.0.1:${WEB_PORT:-8080}:80"
