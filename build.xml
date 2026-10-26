@@ -57,8 +57,7 @@
     Tasks - General
     ====================================================================================================
     -->
-    <target name="all" description="Makes everything"
-            depends="git,update_xml">
+    <target name="all" description="Makes everything" depends="git,update">
     </target>
 
 
@@ -148,23 +147,28 @@
 
                 <!-- Remove duplicates and save the mostly minified file to the repo -->
                 <xmlupdate xml="${update.all}" tofile="${dirs.root}/updates/pkg_panopticon.xml" />
-
-                <ftpdeploy
-                        host="storage.bunnycdn.com"
-                        port="21"
-                        username="${bunny.zone}"
-                        password="${bunny.access}"
-                        dir="updates"
-                        mode="binary"
-                        passive="true"
-                >
-                    <fileset dir="${dirs.release}">
-                        <include name="akeebabackupjed.xml"/>
-                    </fileset>
-                </ftpdeploy>
-
             </then>
         </if>
+    </target>
+
+    <target name="update_deploy">
+        <ftpdeploy
+                host="storage.bunnycdn.com"
+                port="21"
+                username="${bunny.zone}"
+                password="${bunny.access}"
+                dir="updates"
+                mode="binary"
+                passive="true"
+        >
+            <fileset dir="${dirs.root}/updates">
+                <include name="pkg_panopticon.xml"/>
+            </fileset>
+        </ftpdeploy>
+
+    </target>
+
+    <target name="update" depends="update_xml,update_deploy">
     </target>
 
     <!--
