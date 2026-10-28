@@ -3,7 +3,7 @@
 # Shell helpers for the Panopticon Connector integration test harness.
 #
 # Sourced by run-tests.sh. Ported (mostly verbatim) from
-# ~/Projects/j4-akeeba/admintools/tests/integration/docker/run.sh, trimmed to
+# ~/Projects/j5-akeeba/admintools/tests/integration/docker/run.sh, trimmed to
 # what this repository's simpler single-`web`-container stack needs.
 #
 # Functions provided:
