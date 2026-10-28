@@ -9,9 +9,6 @@
 # Functions provided:
 #   log/ok/warn/die              - pretty logging
 #   version_lt A B                - dotted-numeric version comparison
-#   resolve_joomla WANT            - resolve a (partial) Joomla version to the
-#                                     latest matching stable release; prints
-#                                     "<version>\t<url>" or nothing
 #   find_inbox_package PREFIX      - highest cached inbox/Joomla_<prefix>*.zip
 #   acquire_joomla WANT             - inbox-first, else download; sets
 #                                     JOOMLA_ZIP and JOOMLA_RESOLVED
@@ -32,43 +29,10 @@ ok()   { printf "${C_G}  ok${C_0} %s\n" "$*"; }
 warn() { printf "${C_Y}  !!${C_0} %s\n" "$*"; }
 die()  { printf "${C_R}ERROR:${C_0} %s\n" "$*" >&2; exit 1; }
 
-# ---------------------------------------------------------------------------
-# The list of published Joomla/WordPress versions and their download URLs,
-# served (gzip-compressed) by our own Panopticon checksums service.
-#   Docs: https://getpanopticon.com/checksums/index.html
-# ---------------------------------------------------------------------------
-SOURCES_URL="https://getpanopticon.com/checksums/sources.json.gz"
-
 # True (0) when $1 is strictly lower than $2, comparing dotted numeric versions.
 version_lt() {
 	[ "$1" = "$2" ] && return 1
 	[ "$(printf '%s\n%s\n' "$1" "$2" | sort -V | head -1)" = "$1" ]
-}
-
-# Resolve a (possibly partial) Joomla version to the latest matching STABLE
-# release. Prints "<version>\t<download-url>" or nothing if unresolved.
-resolve_joomla() {
-	local want="$1"
-	command -v jq     >/dev/null 2>&1 || die "jq is required to resolve the Joomla version."
-	command -v gunzip >/dev/null 2>&1 || die "gunzip is required to resolve the Joomla version."
-
-	local gz; gz="$(mktemp)"
-	curl -fsSL "${SOURCES_URL}" -o "${gz}" || { rm -f "${gz}"; die "Could not download ${SOURCES_URL}"; }
-
-	# Keep only stable Joomla releases (X.Y.Z with no -alpha/-beta/-rc suffix) whose
-	# version equals the wanted value or falls under the wanted branch prefix, then
-	# take the numerically highest one.
-	local result
-	result="$(gunzip -c "${gz}" | jq -r --arg want "${want}" '
-		[ .[]
-		  | select(.cms == "joomla")
-		  | select(.version | test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))
-		  | select(.version == $want or (.version | startswith($want + "."))) ]
-		| sort_by(.version | split(".") | map(tonumber))
-		| if length == 0 then empty else (last | "\(.version)\t\(.url)") end
-	')"
-	rm -f "${gz}"
-	printf '%s' "${result}"
 }
 
 # Find the highest-versioned Joomla full package already sitting in inbox/ that
@@ -105,20 +69,13 @@ acquire_joomla() {
 		return 0
 	fi
 
-	local resolved; resolved="$(resolve_joomla "${want}")"
-	[ -n "${resolved}" ] || return 1
-
-	local url
-	JOOMLA_RESOLVED="${resolved%%$'\t'*}"
-	url="${resolved#*$'\t'}"
-	local fname="Joomla_${JOOMLA_RESOLVED}-Stable-Full_Package.zip"
-	JOOMLA_ZIP="${INBOX_DIR}/${fname}"
-
-	log "Downloading Joomla ${JOOMLA_RESOLVED}"
+	local getcms="${REPO_ROOT}/../buildfiles/getcms/getcms.php"
+	[ -f "${getcms}" ] || die "${getcms} not found. Check out akeeba/buildfiles next to this repository and run composer install there."
 	mkdir -p "${INBOX_DIR}"
-	curl -fL --progress-bar -o "${JOOMLA_ZIP}" "${url}" \
-		|| { rm -f "${JOOMLA_ZIP}"; die "Download failed: ${url}"; }
-	ok "Downloaded ${fname} to inbox/"
+	php "${getcms}" download "${want}" "${INBOX_DIR}" --no-unzip || return 1
+	JOOMLA_ZIP="$(find_inbox_package "${want}")" || return 1
+	JOOMLA_RESOLVED="$(basename "${JOOMLA_ZIP}" | sed -E 's/^Joomla_([0-9]+\.[0-9]+\.[0-9]+).*/\1/')"
+	ok "Downloaded $(basename "${JOOMLA_ZIP}") to inbox/"
 }
 
 extract_joomla() {

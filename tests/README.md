@@ -5,7 +5,7 @@ This repository has two independent PHPUnit test suites.
 | Suite | Config | What it does | Needs |
 |-------|--------|--------------|-------|
 | **Unit** | `phpunit.xml` | Fast, pure-logic tests. No Joomla, no database, no network. | A PHPUnit 10/11 binary; `component/backend/vendor/` (run `composer install`). |
-| **Integration** | `phpunit-integration.xml` | Drives the real REST API over HTTP against a freshly-installed Joomla on a Dockerised LAMP stack, for the latest Joomla 4, 5 and 6. | Docker, `phing` + the sibling `../buildfiles` repo, and host tools `curl`, `jq`, `gzip`, `unzip`. |
+| **Integration** | `phpunit-integration.xml` | Drives the real REST API over HTTP against a freshly-installed Joomla on a Dockerised LAMP stack, for the latest Joomla 4, 5 and 6. | Docker, `phing`, the sibling `../buildfiles` repo with its Composer dependencies installed, and `unzip`. |
 
 > **No PHPUnit in `composer.json` — by design.** This project redirects Composer's `vendor-dir` to the *shipped* `component/backend/vendor`, so a `require-dev` would leak PHPUnit into the release package. The unit suite uses whatever PHPUnit 10/11 you have on your `PATH` (or a downloaded `phpunit-11.phar`); the integration suite uses a PHPUnit phar baked into its Docker image.
 
@@ -29,7 +29,7 @@ Some of these are *characterization* tests: they assert the code's **current** b
 
 Orchestrated by `tests/integration/run-tests.sh`, which:
 1. Builds & starts the LAMP stack (`tests/integration/docker/`): Apache + PHP (`web`) and MariaDB (`db`).
-2. For each requested Joomla major, resolves the **latest stable** version from the Panopticon checksums feed (`https://getpanopticon.com/checksums/sources.json.gz`), downloads it (cached in `tests/integration/inbox/`), extracts into the web root, and installs it via Joomla's CLI installer (`installation/joomla.php install`, adding `--public-folder` for Joomla ≥ 5).
+2. For each requested Joomla major, uses `getcms` from `../buildfiles` to resolve and download the **latest stable** version (cached both in `tests/integration/inbox/` and getcms's shared cache), extracts into the web root, and installs it via Joomla's CLI installer (`installation/joomla.php install`, adding `--public-folder` for Joomla ≥ 5).
 3. Builds the real `pkg_panopticon` package with `phing git` and installs it via `php cli/joomla.php extension:install`.
 4. Issues an API token with the shipped console command `php cli/joomla.php panopticon:token:get` (which also enables the `webservices/panopticon`, `api-authentication/token` and `user/token` plugins).
 5. Runs the PHPUnit integration suite inside the `web` container against `http://web/api/index.php`.
@@ -56,7 +56,7 @@ tests/
 ├── unit/                 # pure-logic tests + bootstrap
 └── integration/
     ├── run-tests.sh      # orchestrator
-    ├── lib.sh            # Joomla resolve/download/install shell helpers
+    ├── lib.sh            # Joomla getcms/download/install shell helpers
     ├── bootstrap.php
     ├── docker/           # docker-compose.yml, Dockerfile.web, php.ini, env.dist, www/ (web root)
     ├── inbox/            # cached Joomla packages (git-ignored)
