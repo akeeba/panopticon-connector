@@ -3,7 +3,7 @@
 # A single container serves the Joomla site (mod_php, not FPM) and doubles as
 # the CLI environment `run-tests.sh` uses (via `docker compose exec web ...`)
 # to acquire/install Joomla, build/install the connector, mint API tokens and
-# run PHPUnit itself (phpunit-11.phar is baked in below).
+# run PHPUnit itself (a phpunit phar is baked in below).
 
 ARG PHP_VERSION=8.3
 FROM php:${PHP_VERSION}-apache
@@ -43,9 +43,18 @@ RUN apt-get update \
 # container; the actual `phing git` build normally runs on the host).
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
-# PHPUnit 11 phar — no PHPUnit dependency is added to composer.json because
+# PHPUnit phar — no PHPUnit dependency is added to composer.json because
 # component/backend/vendor/ is shipped inside the Joomla extension package.
-ADD https://phar.phpunit.de/phpunit-11.phar /usr/local/bin/phpunit
-RUN chmod +x /usr/local/bin/phpunit
+# PHPUnit 11 requires PHP >= 8.2 and refuses to even start on PHP 8.1, which the committed
+# JOOMLA_MATRIX pairs with Joomla 5.4; PHPUnit 10.5 (its LTS release) is the newest line which
+# still supports PHP 8.1.
+ARG PHP_VERSION
+RUN set -eux; \
+    case "${PHP_VERSION}" in \
+      8.1) phpunitMajor=10 ;; \
+      *)   phpunitMajor=11 ;; \
+    esac; \
+    curl -fsSL -o /usr/local/bin/phpunit "https://phar.phpunit.de/phpunit-${phpunitMajor}.phar"; \
+    chmod +x /usr/local/bin/phpunit
 
 COPY php.ini /usr/local/etc/php/conf.d/zz-panopticon-itest.ini
