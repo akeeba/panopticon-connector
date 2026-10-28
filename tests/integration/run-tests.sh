@@ -8,17 +8,17 @@
 # over real HTTP.
 #
 # Usage:
-#   tests/integration/run-tests.sh                 # test Joomla 4, 5 and 6
-#   tests/integration/run-tests.sh 5                # only Joomla 5
-#   tests/integration/run-tests.sh 5 6              # Joomla 5 and 6
-#   tests/integration/run-tests.sh 5 --keep         # leave the stack running
-#   tests/integration/run-tests.sh 5 -- --filter=SmokeTest
+#   tests/integration/run-tests.sh                 # every Joomla:PHP pair in JOOMLA_MATRIX
+#   tests/integration/run-tests.sh 5.4              # only Joomla 5.4 (with the PHP paired to it)
+#   tests/integration/run-tests.sh 5.4 6            # Joomla 5.4 and 6
+#   tests/integration/run-tests.sh 5.4 --keep       # leave the stack running
+#   tests/integration/run-tests.sh 5.4 -- --filter=SmokeTest
 #
-# Arguments before a bare `--` that look like a major version (4, 5, 6, ...)
-# select which Joomla majors to test (default: 4 5 6). `--keep` leaves the
-# Docker stack running after the run instead of tearing it down. Anything
-# after `--` (or any other unrecognised argument) is passed through to
-# PHPUnit.
+# JOOMLA_MATRIX is committed, not configured: see ../../../buildfiles/docker/e2e/matrix. Arguments
+# before a bare `--` that look like a Joomla version (5.4, 6, ...) select which of its entries to run;
+# one which isn't an entry runs on the matrix's default PHP_VERSION. `--keep` leaves the Docker
+# stack running after the run instead of tearing it down. Anything after `--` (or any other
+# unrecognised argument) is passed through to PHPUnit.
 set -eu
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -73,10 +73,6 @@ while [ $# -gt 0 ]; do
 	esac
 done
 
-if [ "${#MAJORS[@]}" -eq 0 ]; then
-	MAJORS=(4 5 6)
-fi
-
 # ---------------------------------------------------------------------------
 # Environment: create .env from template, load it.
 # ---------------------------------------------------------------------------
@@ -85,6 +81,35 @@ set -a
 . ./.env
 set +a
 
+# The Joomla/PHP versions under test are committed, not configured: the shared matrix in buildfiles
+# is sourced AFTER .env so that a stale .env on any machine cannot shadow it.
+E2E_MATRIX="${REPO_ROOT}/../buildfiles/docker/e2e/matrix"
+[ -f "${E2E_MATRIX}" ] || die "${E2E_MATRIX} not found. Check out akeeba/buildfiles next to this repository."
+set -a
+. "${E2E_MATRIX}"
+if [ -f ./matrix.env ]; then . ./matrix.env; fi
+set +a
+
+# Resolve what to run into MAJORS, a list of `joomla:php` pairs.
+if [ "${#MAJORS[@]}" -eq 0 ]; then
+	# shellcheck disable=SC2206
+	MAJORS=(${JOOMLA_MATRIX})
+else
+	REQUESTED=("${MAJORS[@]}")
+	MAJORS=()
+	for want in "${REQUESTED[@]}"; do
+		found=""
+		for pair in ${JOOMLA_MATRIX}; do
+			[ "${pair%%:*}" = "${want}" ] && { found="${pair}"; break; }
+		done
+		if [ -z "${found}" ]; then
+			warn "Joomla ${want} is not a JOOMLA_MATRIX entry; using PHP ${PHP_VERSION} for it."
+			found="${want}:${PHP_VERSION}"
+		fi
+		MAJORS+=("${found}")
+	done
+fi
+
 : "${DB_IMAGE:=mariadb:11.4}"
 : "${DB_ROOT_PASSWORD:=rootpw}"
 : "${DB_NAME:=joomla_test}"
@@ -92,7 +117,6 @@ set +a
 : "${DB_PASSWORD:=rootpw}"
 : "${DB_PREFIX:=jtest_}"
 : "${WEB_PORT:=8080}"
-: "${PHP_VERSION:=8.3}"
 
 # ---------------------------------------------------------------------------
 # Admin credentials, used consistently across install + token provisioning.
@@ -215,17 +239,20 @@ run_phpunit() {
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
-log "Panopticon Connector integration harness — Joomla majors: ${MAJORS[*]}"
-
-bring_up_stack
+log "Panopticon Connector integration harness — Joomla:PHP pairs: ${MAJORS[*]}"
 
 OVERALL_STATUS=0
 SUMMARY_MAJOR=()
 SUMMARY_VERSION=()
 SUMMARY_RESULT=()
 
-for major in "${MAJORS[@]}"; do
-	log "=== Joomla ${major} ==="
+for pair in "${MAJORS[@]}"; do
+	major="${pair%%:*}"
+	export PHP_VERSION="${pair#*:}"
+	log "=== Joomla ${major} on PHP ${PHP_VERSION} ==="
+
+	# The web image's PHP version varies per entry, so (re)build and start the stack for each one.
+	bring_up_stack
 
 	if ! acquire_joomla "${major}"; then
 		warn ">>> SKIP Joomla ${major}: no stable release could be resolved"
