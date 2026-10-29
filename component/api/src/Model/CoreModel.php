@@ -10,6 +10,7 @@ namespace Akeeba\Component\Panopticon\Api\Model;
 defined('_JEXEC') || die;
 
 use Akeeba\Component\Panopticon\Api\Library\ChunkedDownloadFile;
+use Akeeba\Component\Panopticon\Api\Library\PackageChecksum;
 use Akeeba\Component\Panopticon\Api\Library\ServerInfo;
 use Akeeba\Component\Panopticon\Api\Library\VersionStability;
 use Akeeba\Component\Panopticon\Api\Mixin\HttpResponseCompatibilityTrait;
@@ -569,7 +570,7 @@ ENDDATA;
 
 	/**
 	 * @return array{basename:string|false, url:string|null, size:int, offset:int, chunk_index:int, done:bool, error:
-	 *                                      string|null}
+	 *                                      string|null, check?:bool}
 	 * @throws Exception
 	 * @since  1.0.0
 	 */
@@ -850,12 +851,55 @@ ENDDATA;
 
 		@fclose($fp);
 
+		// A finished download is checked against the size and hashes advertised by the update source.
+		if ($result['done'] && $result['error'] === null)
+		{
+			$result['check'] = $this->isChunkedDownloadValid($outFile, (int) $size);
+		}
+
 		if (self::DEBUG_CHUNKED_DOWNLOAD)
 		{
 			$result['debug'] = $debug;
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Checks a completed chunked download against the expected size and the update source's hashes.
+	 *
+	 * @param   string  $file          The downloaded package.
+	 * @param   int     $expectedSize  The size reported by the server.
+	 *
+	 * @return  bool
+	 * @since   1.2.0
+	 */
+	private function isChunkedDownloadValid(string $file, int $expectedSize): bool
+	{
+		$hashes = [];
+
+		try
+		{
+			$updateInfo = $this->getUpdateInformation();
+			$object     = is_array($updateInfo) ? ($updateInfo['object'] ?? null) : null;
+
+			if (is_object($object) && method_exists($object, 'get'))
+			{
+				foreach (PackageChecksum::ALGORITHMS as $algo)
+				{
+					if ($object->get($algo, false))
+					{
+						$hashes[$algo] = (string) ($object->$algo->_data ?? '');
+					}
+				}
+			}
+		}
+		catch (Throwable $e)
+		{
+			// No update information: we can only check the size.
+		}
+
+		return PackageChecksum::verify($file, $expectedSize, $hashes);
 	}
 
 	private function getURLForChunkedDownloads(): ?string

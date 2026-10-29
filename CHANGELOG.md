@@ -3,6 +3,7 @@
 * ✨ Add machine translations for `de-DE`, `el-GR`, `es-ES`, `fr-FR`, `it-IT`, and `pt-PT`
 * ✨ Support a custom base URL for the Core File Integrity checksums source
 * ✨ Support for PHP 8.6 and Joomla! 6.2
+* ✏️ Chunked core update downloads are now verified against the update's size and hashes
 * ✏️ Installation is now refused on PHP and Joomla! versions outside the supported range
 * 🐞 Core updates downloaded in several requests produced a package one byte short, failing extraction
 * 🐞 Package downloads failed on Joomla! 5.4 and later, including Joomla! 6, reporting a misleading “HTTP 400” error [#28]
