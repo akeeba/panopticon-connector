@@ -9,6 +9,7 @@ namespace Akeeba\Component\Panopticon\Api\Model;
 
 defined('_JEXEC') || die;
 
+use Akeeba\Component\Panopticon\Api\Library\ChunkedDownloadFile;
 use Akeeba\Component\Panopticon\Api\Library\ServerInfo;
 use Akeeba\Component\Panopticon\Api\Library\VersionStability;
 use Akeeba\Component\Panopticon\Api\Mixin\HttpResponseCompatibilityTrait;
@@ -669,47 +670,11 @@ ENDDATA;
 		// Open the output file.
 		$tempDir = Factory::getApplication()->get('tmp_path');
 		$outFile = $tempDir . '/' . $basename;
+		$fp      = null;
 
 		try
 		{
-			if ($offset > 0)
-			{
-				clearstatcache(false, $outFile);
-
-				if (!file_exists($outFile))
-				{
-					throw new RuntimeException(
-						sprintf(
-							'The Joomla update package file %s went away',
-							basename($outFile)
-						)
-					);
-				}
-
-				$filesize = @filesize($outFile) ?: 0;
-
-				if ($filesize < $offset)
-				{
-					throw new RuntimeException(
-						sprintf(
-							'The Joomla update package file %s is smaller than expected (expected: %d bytes; current: %d bytes)',
-							basename($outFile), $offset, $filesize
-						)
-					);
-				}
-			}
-
-			$fp = @fopen($outFile, 'ab');
-
-			if ($fp === false)
-			{
-				throw new RuntimeException('Cannot open output file for writing.');
-			}
-
-			// If there's an offset make sure the file size isn't beyond that offset and get ready to append data.
-			@ftruncate($fp, max($offset, 0));
-			@fseek($fp, max($offset, 0));
-
+			$fp = ChunkedDownloadFile::openForResume($outFile, $offset);
 		}
 		catch (Exception $e)
 		{
