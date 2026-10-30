@@ -1,5 +1,6 @@
 # Akeeba Panopticon Connector for Joomla 4.x, 5.x, and 6.x version 1.2.1
 
+* ✨ Component permissions: Super Users can now hide the connector from other user groups
 * ✏️ Chunked core update downloads are now verified against the update's size and hashes
 * 🐞 Core updates downloaded in several requests produced a package one byte short, failing extraction
 
@@ -8,7 +9,6 @@
 * ✨ Add machine translations for `de-DE`, `el-GR`, `es-ES`, `fr-FR`, `it-IT`, and `pt-PT`
 * ✨ Support a custom base URL for the Core File Integrity checksums source
 * ✨ Support for PHP 8.6 and Joomla! 6.2
-* ✨ Component permissions: Super Users can now hide the connector from other user groups
 * ✏️ Installation is now refused on PHP and Joomla! versions outside the supported range
 * 🐞 Package downloads failed on Joomla! 5.4 and later, including Joomla! 6, reporting a misleading “HTTP 400” error [#28]
 * 🐞 Core updates fail with HTTP 500 on Joomla 5.1–5.2 due to removed `File::exists()` method [#26]
