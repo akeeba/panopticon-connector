@@ -36,6 +36,7 @@
         <menu>COM_PANOPTICON</menu>
 
         <files folder="backend">
+            <filename>access.xml</filename>
             <filename>config.xml</filename>
             <filename>version.php</filename>
 
